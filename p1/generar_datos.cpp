@@ -24,15 +24,16 @@ int main(int argc, char const *argv[])
 {
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_int_distribution<int> dist(0, 100);
+    std::uniform_int_distribution<float> dist(10, 100);
     int n_datos = dist(mt);
+    const float prob_0 = 0.25f;
     std::vector<std::vector<bool>> M(n_datos, std::vector<bool>(n_datos));
-    std::uniform_int_distribution<int> dist_bool(0, 1);
+    std::uniform_real_distribution<float> dist_val(0.0f, 1.0f);
     for (int i = 0; i < n_datos; i++)
     {
         for (int j = 0; j < i + 1; j++)
         {
-            bool data = dist_bool(mt);
+            bool data = dist_val(mt) >= prob_0 ? 1 : 0;
             M[i][j] = data;
             M[j][i] = data;
         }

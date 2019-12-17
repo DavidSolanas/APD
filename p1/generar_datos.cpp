@@ -35,6 +35,11 @@ int main(int argc, char const *argv[])
         for (int j = 0; j < i + 1; j++)
         {
             bool data = dist_val(mt) >= prob_0 ? true : false;
+            if (i == j)
+            {
+                data = false;
+            }
+
             M[i][j] = data;
             M[j][i] = data;
         }

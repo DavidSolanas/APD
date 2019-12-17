@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 #include <vector>
+#include <stdlib.h>
 
 int get_n_related(const std::vector<std::vector<bool>> &M, const int n)
 {
@@ -24,23 +25,23 @@ int main(int argc, char const *argv[])
 {
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_int_distribution<float> dist(10, 100);
-    int n_datos = dist(mt);
-    const float prob_0 = 0.25f;
+    const float prob_0 = atof(argv[3]);
+    std::string namefile = argv[1];
+    int n_datos = atoi(argv[2]);
     std::vector<std::vector<bool>> M(n_datos, std::vector<bool>(n_datos));
     std::uniform_real_distribution<float> dist_val(0.0f, 1.0f);
     for (int i = 0; i < n_datos; i++)
     {
         for (int j = 0; j < i + 1; j++)
         {
-            bool data = dist_val(mt) >= prob_0 ? 1 : 0;
+            bool data = dist_val(mt) >= prob_0 ? true : false;
             M[i][j] = data;
             M[j][i] = data;
         }
     }
 
     // Volcar datos en un fichero
-    std::ofstream f("./datos.txt");
+    std::ofstream f(namefile);
     if (f.is_open())
     {
         f << n_datos << std::endl;

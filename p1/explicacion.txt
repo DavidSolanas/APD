@@ -1,0 +1,12 @@
+###############################################################
+#							      #
+#   Autores: Santiago Buey (747827) y David Solanas (738630)  #
+#   Práctica 1 - Algoritmia para problemas difíciles          #
+#							      #
+###############################################################
+
+Los conjuntos de datos se han generado principalmente con un programa desarrollado en c++ en el que se especifica el número de productos y la probabilidad de que dos productos se hayan comprado alguna vez juntos (permitiendo así controlar la densidad del grafo). El programa crea una matriz A de n_productos x n_productos y la recorre desde el producto 1 hasta el producto n (llegando en cada fila i, hasta la columna i), de forma que en cada celda Aij se le asigna un valor aleatorio (0 o 1) con la probabilidad especificada por el usuario; el valor calculado para la celda Aij será el valor para celda Aji. La diagonal de la matriz se ha rellenado con 0s, evitando así que un nodo tenga una arista a él mismo. 
+
+Algunos otros ficheros han sido generados de forma manual para crear grafos concretos que pueden resultar interesantes para probar el funcionamiento del algoritmo.
+
+Los ficheros con los productos se han generado de forma automática, se distribuyen en 4 columnas, la primera el id del producto (número de 1 a n), la segunda el nombre ("Producto_X" con X = 1..n), la tercera el precio del producto (int) y la última el número de unidades (int).

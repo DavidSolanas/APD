@@ -44,8 +44,6 @@ public:
     }
 };
 
-
-
 // Estructura de datos para representar el grafo sobre el que aplicamos Karger
 class Grafo
 {
@@ -59,35 +57,35 @@ public:
     Grafo(const int n_v, const int n_a, set<Arista> a) : n_vertices(n_v), n_aristas(n_a), aristas(a) {}
 };
 
-
 //Obtiene directamente del fichero el grafo correspondiente
 // Leemos solo triangulo superior de la matriz
-void cargar_grafo(ifstream &f, Grafo &grafo){
+void cargar_grafo(ifstream &f, Grafo &grafo)
+{
     int num_productos;
     f >> num_productos;
     grafo.n_vertices = num_productos;
 
-    int ultimaColumna=1; //ultimaColumna in [1..num_productos] para descartar el triangulo inferior
-    int esArista=0;
-    for (int i=1; i <= num_productos; i++){
-        for (int j=1; j <= num_productos; j++){
+    bool esArista;
+    for (int i = 0; i < num_productos; i++)
+    {
+        for (int j = 0; j < num_productos; j++)
+        {
             f >> esArista;
-            if (j > ultimaColumna && esArista==1 && i!=j){  //La ultima comprobacion por si acaso
+            if (j < i && esArista)
+            {
                 grafo.aristas.insert(Arista(i, j));
             }
         }
-        ultimaColumna++;
     }
     grafo.n_aristas = grafo.aristas.size();
 }
-
-
 
 int main(int argc, char const *argv[])
 {
     string usage = "Uso: pract1 <fichero_datos>";
     Grafo grafo;
-    if (argc != 2){
+    if (argc != 2)
+    {
         cerr << "Número incorrecto de parámetros" << std::endl;
         cerr << usage << std::endl;
         exit(1);
@@ -98,8 +96,6 @@ int main(int argc, char const *argv[])
     if (f.is_open())
     {
         cargar_grafo(f, grafo);
-
-
         f.close();
     }
     return 0;

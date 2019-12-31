@@ -12,12 +12,47 @@ struct Arista{
     int v1, v2; 
 };
 
+
+
 // Estructura de datos para representar el grafo sobre el que aplicamos Karger
 struct Grafo{
     int V;  // Numero de vertices
     int A;  // Numero de aristas
     vector<Arista> aristas; // Grafo representado como un vector de aristas
 };
+
+Grafo newGrafo(){
+    Grafo g;
+    g.V=0;
+    g.A=0;
+    //g.aristas= new ;
+    return g;
+}
+
+void 
+
+//Obtiene directamente del fichero el grafo correspondiente
+// Leemos solo triangulo superior de la matriz
+Grafo grafoCompras(ifstream &f, const int numProductos){
+
+    Grafo g = newGrafo();
+
+    int ultimaColumna=1;
+    int esArista=0;
+    for (int i=1; i <= numProductos; i++){
+        for (int j=1; j <= numProductos; j++){
+            f >> esArista;
+            if (j > ultimaColumna && esArista==1 && i!=j){  //La ultima comprobacion por si acaso
+                
+            }
+        }
+        ultimaColumna++;
+    }
+    
+
+
+}
+
 
 
 int main(int argc, char const *argv[]){
@@ -34,12 +69,8 @@ int main(int argc, char const *argv[]){
             int numProductos;
             f >> numProductos;
             cout << numProductos << endl;
-            for (int i=1; i++; i <= numProductos){
-                for (int j=1; j <= numProductos; j++){
 
-                }
-            }
-
+            Grafo g=grafoCompras(f,numProductos);
             f.close();
         }
     }

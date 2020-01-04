@@ -60,11 +60,14 @@ public:
 
 //Obtiene directamente del fichero el grafo correspondiente
 // Leemos solo triangulo superior de la matriz
-void cargar_grafo(ifstream &f, Grafo &grafo, int num_productos)
+void cargar_grafo(ifstream &f, Grafo &grafo)
 {
+    int num_productos;
+    bool esArista;
+
+    f >> num_productos;
     grafo.n_vertices = num_productos;
 
-    bool esArista;
     for (int i = 0; i < num_productos; i++)
     {
         for (int j = 0; j < num_productos; j++)
@@ -90,13 +93,13 @@ void merge(Grafo &G, const int index)
 
     const int new_v = (*e).v1;
     const int v = (*e).v2;
-    cout << "eliminando arista: <" << new_v << ", " << v << ">\n";
+    //cout << "eliminando arista: <" << new_v << ", " << v << ">\n";
     // Actualiza el número de vértices del grafo G
     G.n_vertices--;
     // Borra la arista a del grafo G
     G.aristas.erase(e);
-
-    for (auto it = G.aristas.begin(); it != G.aristas.end(); it++)
+    auto it = G.aristas.begin();
+    while (it != G.aristas.end())
     {
         (*it).v1 = (*it).v1 == v ? new_v : (*it).v1;
         (*it).v2 = (*it).v2 == v ? new_v : (*it).v2;
@@ -104,12 +107,14 @@ void merge(Grafo &G, const int index)
         //Self loop
         if ((*it).v1 == (*it).v2)
         {
-            G.aristas.erase(it);
+            it = G.aristas.erase(it);
             continue;
         }
 
         if ((*it).v2 < (*it).v1)
             swap((*it).v1, (*it).v2);
+
+        it++;
     }
     G.n_aristas = G.aristas.size();
 }
@@ -127,6 +132,21 @@ int karger(Grafo &G)
         merge(G, i);
     }
     return G.n_aristas;
+}
+
+int rep_karger(const Grafo &G, const int n)
+{
+    int min = G.n_aristas;
+    for (int i = 0; i < n; i++)
+    {
+        Grafo _G(G.n_vertices, G.n_aristas, G.aristas);
+        int k = karger(_G);
+        if (k < min)
+        {
+            min = k;
+        }
+    }
+    return min;
 }
 
 void cargar_productos(ifstream &f, map<int, string> &productos, int num_productos)
@@ -162,21 +182,9 @@ int main(int argc, char const *argv[])
     ifstream f(filenameDatos);
     if (f.is_open())
     {
-        //cargar_grafo(f, grafo);
-        grafo.n_vertices = 4;
-        grafo.n_aristas = 5;
-        grafo.aristas.push_back(Arista(0, 1));
-        grafo.aristas.push_back(Arista(0, 2));
-        grafo.aristas.push_back(Arista(0, 3));
-        grafo.aristas.push_back(Arista(1, 3));
-        grafo.aristas.push_back(Arista(2, 3));
-
+        cargar_grafo(f, grafo);
         int n = karger(grafo);
         cout << n << endl;
-        for (auto &&i : grafo.aristas)
-        {
-            cout << i.v1 << "  " << i.v2 << endl;
-        }
         f.close();
     }
     else

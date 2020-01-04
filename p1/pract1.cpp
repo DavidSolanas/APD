@@ -2,6 +2,7 @@
 #include <random>
 #include <fstream>
 #include <set>
+#include <map> 
 
 using namespace std;
 
@@ -59,10 +60,8 @@ public:
 
 //Obtiene directamente del fichero el grafo correspondiente
 // Leemos solo triangulo superior de la matriz
-void cargar_grafo(ifstream &f, Grafo &grafo)
+void cargar_grafo(ifstream &f, Grafo &grafo, int num_productos)
 {
-    int num_productos;
-    f >> num_productos;
     grafo.n_vertices = num_productos;
 
     bool esArista;
@@ -80,23 +79,63 @@ void cargar_grafo(ifstream &f, Grafo &grafo)
     grafo.n_aristas = grafo.aristas.size();
 }
 
+int minCut(Grafo g){
+
+
+}
+
+void cargar_productos(ifstream &f, map<int, string> &productos, int num_productos){
+    int clave;
+    string valor, aux;
+    for (int i=0; i < num_productos; i++){
+        f >> clave; //ID del producto
+        f >> aux;   //nombre
+        valor = aux;
+        f >> aux;   //precio
+        valor = valor + "-" + aux;
+        f >> aux;   //unidades disponibles
+        valor = valor + "-" + aux;
+        productos.insert(pair<int,string>(clave, valor));
+    }  
+}
+
 int main(int argc, char const *argv[])
 {
-    string usage = "Uso: pract1 <fichero_datos>";
+    string usage = "Uso: ./pract1 <fichero_datos> <fichero_productos>";
     Grafo grafo;
-    if (argc != 2)
+    if (argc != 3)
     {
         cerr << "Número incorrecto de parámetros" << std::endl;
         cerr << usage << std::endl;
         exit(1);
     }
 
-    string filename = argv[1];
-    ifstream f(filename);
+    string filenameDatos = argv[1];
+    string filenameProductos = argv[2];
+    ifstream f(filenameDatos);
     if (f.is_open())
-    {
-        cargar_grafo(f, grafo);
+    {   
+        int num_productos;
+        f >> num_productos;
+
+        ifstream fp(filenameProductos); //Si puede lee el fichero de productos, sino suda
+        if (fp.is_open()){
+            map<int, string> productos;
+            cargar_productos(fp, productos, num_productos);
+            
+            fp.close();
+        }
+        else{
+            cerr << "No se ha podido abrir el fichero de productos\n";
+        }
+
+        cargar_grafo(f, grafo, num_productos);
+
+
         f.close();
+    }
+    else{
+        cerr << "No se ha podido abrir el fichero de datos\n";
     }
     return 0;
 }

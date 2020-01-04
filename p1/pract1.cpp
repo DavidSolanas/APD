@@ -1,7 +1,7 @@
 #include <iostream>
 #include <random>
 #include <fstream>
-#include <set>
+#include <list>
 
 using namespace std;
 
@@ -48,13 +48,13 @@ public:
 class Grafo
 {
 public:
-    int n_vertices;      // Numero de vertices
-    int n_aristas;       // Numero de aristas
-    set<Arista> aristas; // Grafo representado como un conjunto de aristas
+    int n_vertices;       // Numero de vertices
+    int n_aristas;        // Numero de aristas
+    list<Arista> aristas; // Grafo representado como un conjunto de aristas
 
     //Constructor
     Grafo() {}
-    Grafo(const int n_v, const int n_a, set<Arista> a) : n_vertices(n_v), n_aristas(n_a), aristas(a) {}
+    Grafo(const int n_v, const int n_a, list<Arista> a) : n_vertices(n_v), n_aristas(n_a), aristas(a) {}
 };
 
 //Obtiene directamente del fichero el grafo correspondiente
@@ -73,11 +73,49 @@ void cargar_grafo(ifstream &f, Grafo &grafo)
             f >> esArista;
             if (j < i && esArista)
             {
-                grafo.aristas.insert(Arista(i, j));
+                grafo.aristas.push_back(Arista(i, j));
             }
         }
     }
     grafo.n_aristas = grafo.aristas.size();
+}
+
+/**
+ * Junta los dos vértices de la arista a en el nodo de menor índice de a
+ * y actualiza las aristas del grafo G que apuntaban a esos dos vértices.
+ */
+void merge(Grafo &G, const int index)
+{
+    auto e = G.aristas.begin();
+    std::advance(e, index);
+
+    const int new_v = (*e).v1;
+    const int v = (*e).v2;
+
+    // Actualiza el número de vértices del grafo G
+    G.n_vertices--;
+    // Borra la arista a del grafo G
+    G.aristas.erase(e);
+
+    for (auto it = G.aristas.begin(); it != G.aristas.end(); it++)
+    {
+        //Self loop
+        if ((*it).v1 == (*it).v2)
+        {
+            G.aristas.erase(it);
+            continue;
+        }
+        (*it).v1 = (*it).v1 == v ? new_v : (*it).v1;
+        (*it).v2 = (*it).v2 == v ? new_v : (*it).v2;
+
+        if ((*it).v2 < (*it).v1)
+        {
+            cout << (*it).v1 << "  " << (*it).v2 << endl;
+            swap((*it).v1, (*it).v2);
+            cout << (*it).v1 << "  " << (*it).v2 << endl;
+        }
+    }
+    G.n_aristas = G.aristas.size();
 }
 
 int main(int argc, char const *argv[])
@@ -95,7 +133,24 @@ int main(int argc, char const *argv[])
     ifstream f(filename);
     if (f.is_open())
     {
-        cargar_grafo(f, grafo);
+        //cargar_grafo(f, grafo);
+        grafo.n_vertices = 4;
+        grafo.n_aristas = 5;
+        grafo.aristas.push_back(Arista(0, 1));
+        grafo.aristas.push_back(Arista(0, 2));
+        grafo.aristas.push_back(Arista(0, 3));
+        grafo.aristas.push_back(Arista(1, 3));
+        grafo.aristas.push_back(Arista(2, 3));
+        for (auto &&i : grafo.aristas)
+        {
+            cout << i.v1 << "  " << i.v2 << endl;
+        }
+        cout << endl;
+        merge(grafo, 0);
+        for (auto &&i : grafo.aristas)
+        {
+            cout << i.v1 << "  " << i.v2 << endl;
+        }
         f.close();
     }
     return 0;

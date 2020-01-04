@@ -90,7 +90,7 @@ void merge(Grafo &G, const int index)
 
     const int new_v = (*e).v1;
     const int v = (*e).v2;
-
+    cout << "eliminando arista: <" << new_v << ", " << v << ">\n";
     // Actualiza el número de vértices del grafo G
     G.n_vertices--;
     // Borra la arista a del grafo G
@@ -98,23 +98,35 @@ void merge(Grafo &G, const int index)
 
     for (auto it = G.aristas.begin(); it != G.aristas.end(); it++)
     {
+        (*it).v1 = (*it).v1 == v ? new_v : (*it).v1;
+        (*it).v2 = (*it).v2 == v ? new_v : (*it).v2;
+
         //Self loop
         if ((*it).v1 == (*it).v2)
         {
             G.aristas.erase(it);
             continue;
         }
-        (*it).v1 = (*it).v1 == v ? new_v : (*it).v1;
-        (*it).v2 = (*it).v2 == v ? new_v : (*it).v2;
 
         if ((*it).v2 < (*it).v1)
-        {
-            cout << (*it).v1 << "  " << (*it).v2 << endl;
             swap((*it).v1, (*it).v2);
-            cout << (*it).v1 << "  " << (*it).v2 << endl;
-        }
     }
     G.n_aristas = G.aristas.size();
+}
+
+int karger(Grafo &G)
+{
+    std::random_device rd;
+    std::mt19937 mt(rd());
+
+    while (G.n_vertices > 2)
+    {
+        // seleccionar arista aletoriamente
+        std::uniform_int_distribution<int> dist(0, G.n_aristas - 1);
+        int i = dist(mt);
+        merge(G, i);
+    }
+    return G.n_aristas;
 }
 
 void cargar_productos(ifstream &f, map<int, string> &productos, int num_productos)
@@ -158,12 +170,9 @@ int main(int argc, char const *argv[])
         grafo.aristas.push_back(Arista(0, 3));
         grafo.aristas.push_back(Arista(1, 3));
         grafo.aristas.push_back(Arista(2, 3));
-        for (auto &&i : grafo.aristas)
-        {
-            cout << i.v1 << "  " << i.v2 << endl;
-        }
-        cout << endl;
-        merge(grafo, 0);
+
+        int n = karger(grafo);
+        cout << n << endl;
         for (auto &&i : grafo.aristas)
         {
             cout << i.v1 << "  " << i.v2 << endl;

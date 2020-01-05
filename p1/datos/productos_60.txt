@@ -1,60 +1,60 @@
-1   Producto_1    1881    48482
-2   Producto_2    18    42137
-3   Producto_3    1190    34171
-4   Producto_4    1301    22450
-5   Producto_5    1711    14035
-6   Producto_6    873    39803
-7   Producto_7    1176    10510
-8   Producto_8    1449    12543
-9   Producto_9    1519    43541
-10   Producto_10    298    38083
-11   Producto_11    1801    40048
-12   Producto_12    145    20407
-13   Producto_13    1925    2902
-14   Producto_14    1836    34570
-15   Producto_15    1404    40935
-16   Producto_16    764    36492
-17   Producto_17    1468    13487
-18   Producto_18    1811    34488
-19   Producto_19    1790    42298
-20   Producto_20    467    17019
-21   Producto_21    1189    43959
-22   Producto_22    863    17264
-23   Producto_23    1003    40086
-24   Producto_24    818    30039
-25   Producto_25    735    46067
-26   Producto_26    1317    19601
-27   Producto_27    1684    16839
-28   Producto_28    1746    3245
-29   Producto_29    718    14606
-30   Producto_30    340    30033
-31   Producto_31    507    39441
-32   Producto_32    788    45006
-33   Producto_33    765    29040
-34   Producto_34    1372    30039
-35   Producto_35    1286    19146
-36   Producto_36    23    14288
-37   Producto_37    1513    21969
-38   Producto_38    602    47197
-39   Producto_39    1438    20726
-40   Producto_40    66    38275
-41   Producto_41    461    46780
-42   Producto_42    590    48633
-43   Producto_43    546    6073
-44   Producto_44    1602    19132
-45   Producto_45    1931    42294
-46   Producto_46    1285    17415
-47   Producto_47    1240    36255
-48   Producto_48    1299    1304
-49   Producto_49    1492    9007
-50   Producto_50    357    1343
-51   Producto_51    451    47590
-52   Producto_52    1248    16869
-53   Producto_53    924    24108
-54   Producto_54    900    49838
-55   Producto_55    47    46277
-56   Producto_56    421    1403
-57   Producto_57    1943    4976
-58   Producto_58    346    42076
-59   Producto_59    432    35232
-60   Producto_60    145    2384
+Producto_1	1318	2936
+Producto_2	247	16354
+Producto_3	1106	27554
+Producto_4	676	7901
+Producto_5	1720	12115
+Producto_6	1297	32049
+Producto_7	401	14950
+Producto_8	1061	18869
+Producto_9	1033	47094
+Producto_10	1401	12197
+Producto_11	1386	1802
+Producto_12	1215	33944
+Producto_13	892	16203
+Producto_14	1038	10098
+Producto_15	593	6866
+Producto_16	878	46036
+Producto_17	1687	25413
+Producto_18	577	5968
+Producto_19	432	835
+Producto_20	134	27044
+Producto_21	195	10601
+Producto_22	1556	36000
+Producto_23	1536	13378
+Producto_24	951	30224
+Producto_25	1460	47551
+Producto_26	446	34449
+Producto_27	1191	23964
+Producto_28	262	18569
+Producto_29	1843	36945
+Producto_30	1142	30871
+Producto_31	1752	4148
+Producto_32	1903	8717
+Producto_33	711	37405
+Producto_34	1581	3020
+Producto_35	822	48047
+Producto_36	1345	18255
+Producto_37	1568	15643
+Producto_38	844	30668
+Producto_39	337	45390
+Producto_40	1046	41942
+Producto_41	1157	45448
+Producto_42	1512	38249
+Producto_43	1163	45662
+Producto_44	1152	48103
+Producto_45	594	38413
+Producto_46	1601	9676
+Producto_47	849	45179
+Producto_48	1473	17184
+Producto_49	186	48085
+Producto_50	680	14291
+Producto_51	1609	16912
+Producto_52	1370	39104
+Producto_53	371	8484
+Producto_54	1591	12550
+Producto_55	341	25996
+Producto_56	1358	33546
+Producto_57	1284	27063
+Producto_58	1504	407
+Producto_59	799	14866
+Producto_60	1279	31592

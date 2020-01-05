@@ -1,10 +1,10 @@
-1   Producto_1    1763    5214
-2   Producto_2    1892    47723
-3   Producto_3    1669    8348
-4   Producto_4    1636    5292
-5   Producto_5    1525    28223
-6   Producto_6    1568    43156
-7   Producto_7    1518    36543
-8   Producto_8    1794    42264
-9   Producto_9    832    32814
-10   Producto_10    612    25503
+Producto_1	1089	26585
+Producto_2	1607	29451
+Producto_3	781	2670
+Producto_4	765	2155
+Producto_5	528	11972
+Producto_6	1302	12024
+Producto_7	341	32020
+Producto_8	1428	25620
+Producto_9	994	23246
+Producto_10	1709	39845

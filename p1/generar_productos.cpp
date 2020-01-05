@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 int main(int argc, char const *argv[])
 {
     std::random_device rd;
@@ -18,17 +17,19 @@ int main(int argc, char const *argv[])
 
     // Volcar datos en un fichero
     std::ofstream f(namefile);
-    if (f.is_open()){   
+    if (f.is_open())
+    {
         int precio, unidades;
-        for (int i = 0; i < n_datos; i++){   
-            precio= dist_precio(mt);
-            unidades= dist_unidades(mt);
-            f << i+1 << "   " << "Producto_" << i+1 << "    " << precio 
-            << "    " << unidades << "\n" ;
+        for (int i = 0; i < n_datos; i++)
+        {
+            precio = dist_precio(mt);
+            unidades = dist_unidades(mt);
+            f << "Producto_" << i + 1 << "\t" << precio << "\t" << unidades << "\n";
         }
         f.close();
     }
-    else{
+    else
+    {
         std::cerr << "Fichero no creado" << std::endl;
     }
     return 0;

@@ -1,8 +1,8 @@
-1   Producto_1    269    1905
-2   Producto_2    128    26464
-3   Producto_3    1497    41177
-4   Producto_4    1696    7742
-5   Producto_5    1298    37965
-6   Producto_6    1371    12046
-7   Producto_7    1535    3130
-8   Producto_8    1732    39033
+Producto_1	1964	15499
+Producto_2	1459	43046
+Producto_3	1375	27744
+Producto_4	835	22966
+Producto_5	1803	41074
+Producto_6	1872	6470
+Producto_7	1974	41151
+Producto_8	1550	4748

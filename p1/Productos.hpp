@@ -17,6 +17,7 @@ private:
     double precio;
 
 public:
+    Producto() {}
     Producto(const std::string &_nombre, const int _unidades, const double _precio) : nombre(_nombre),
                                                                                       unidades(_unidades), precio(_precio) {}
     void set_nombre(const std::string &nombre);

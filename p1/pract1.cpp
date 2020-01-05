@@ -3,7 +3,7 @@
 #include <fstream>
 #include <list>
 #include <vector>
-#include <map>
+#include "Productos.hpp"
 #include <cmath>
 #include <ctime>
 
@@ -45,7 +45,7 @@ public:
     //Constructor, siempre se asigna a v1 el menor de los valores de los parámetros
     Arista(const int _v1, const int _v2, const int _peso)
     {
-        peso=_peso;
+        peso = _peso;
         if (_v1 < _v2)
         {
             v1 = _v1;
@@ -59,9 +59,7 @@ public:
     }
     const bool operator<(const Arista &a) const
     {
-        int _a = v2 - v1;
-        int _b = a.v2 - a.v1;
-        return v1 < a.v1 || v2 < a.v2 || _a < _b;
+        return peso < a.peso;
     }
 
     const bool operator==(const Arista &a) const
@@ -116,11 +114,11 @@ bool cargar_grafo(ifstream &f, Grafo &grafo)
         for (int j = 0; j < num_productos; j++)
         {
             f >> valorArista;
-            //desconectado = desconectado & !esArista;
-            desconectado = desconectado & valorArista==0;
+            desconectado = desconectado & (valorArista == 0);
             if (j < i && valorArista > 0) //Si es arista se añade al grafo
             {
-                if (valorArista != 1){
+                if (valorArista != 1)
+                {
                     esMatrizBinaria = false;
                 }
                 grafo.aristas.push_back(Arista(i, j, valorArista));
@@ -132,8 +130,9 @@ bool cargar_grafo(ifstream &f, Grafo &grafo)
             grafo.conexo = false;
     }
     grafo.n_aristas = grafo.aristas.size();
-    if (esMatrizBinaria){
-        grafo.aristas.sort();                   //  ¿PODRIA CAMBIAR LA SOBRECARGA DEL OPERADOR < PARA QUE ORDENE SEGUN EL PESO DE LA ARISTA?
+    if (esMatrizBinaria)
+    {
+        grafo.aristas.sort();
     }
 
     return esMatrizBinaria;
@@ -186,11 +185,13 @@ Grafo karger(const Grafo &G, const bool esMatrizBinaria)
     while (_G.n_vertices > 2)
     {
         // seleccionar arista aletoriamente
-        if (esMatrizBinaria){
-            std::uniform_int_distribution<int> dist(0, min(_G.n_aristas - 1, 5));   //¿Como favorecemos que se elijan las aristas mas pesadas? 
-            i = dist(mt);                                         //De momento esta puesto que coja una de las 5 primeras, ya que la lista esta ordenada, pero no se
+        if (esMatrizBinaria)
+        {
+            std::uniform_int_distribution<int> dist(0, min(_G.n_aristas - 1, 5)); //¿Como favorecemos que se elijan las aristas mas pesadas?
+            i = dist(mt);                                                         //De momento esta puesto que coja una de las 5 primeras, ya que la lista esta ordenada, pero no se
         }
-        else{
+        else
+        {
             std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
             i = dist(mt);
         }
@@ -232,7 +233,7 @@ Grafo contract(const Grafo &G, const int t)
     return _G;
 }
 
-Grafo karger_stein(const Grafo &G , const bool esMatrizBinaria)
+Grafo karger_stein(const Grafo &G, const bool esMatrizBinaria)
 {
     if (G.n_vertices <= 6)
     {
@@ -247,21 +248,18 @@ Grafo karger_stein(const Grafo &G , const bool esMatrizBinaria)
     }
 }
 
-void cargar_productos(ifstream &f, map<int, string> &productos /*, int num_productos*/)
+void cargar_productos(ifstream &f, vector<Producto> &productos)
 {
-    int clave;
-    string valor, aux;
-    //for (int i = 0; i < num_productos; i++)
+    std::string nombre;
+    int unidades;
+    double precio;
+    int i = 0;
     while (!f.eof())
     {
-        f >> clave; //ID del producto
-        f >> aux;   //nombre
-        valor = aux;
-        f >> aux; //precio
-        valor = valor + "-" + aux;
-        f >> aux; //unidades disponibles
-        valor = valor + "-" + aux;
-        productos.insert(pair<int, string>(clave, valor));
+        f >> nombre;   //nombre
+        f >> precio;   //precio
+        f >> unidades; //unidades disponibles
+        productos[i++] = Producto(nombre, unidades, precio);
     }
 }
 
@@ -281,20 +279,18 @@ void calcular_desconectado(const Grafo &G, list<int> &v1, list<int> &v2)
     }
 }
 
-void mostrar_conjuntos(list<int> v1, list<int> v2,  map<int, string> &productos)
+void mostrar_conjuntos(list<int> v1, list<int> v2, vector<Producto> &productos)
 {
     cout << "Conjunto productos Amazon:    {  ";
     for (auto &&i : v1)
     {
-        size_t pos = productos[i+1].find("-");
-        cout << productos[i+1].substr (0,pos) << " ";
+        cout << productos[i].get_nombre() << "  ";
     }
     cout << "}\n";
     cout << "Conjunto productos Amazonymas: {  ";
     for (auto &&i : v2)
     {
-        size_t pos = productos[i+1].find("-");
-        cout << productos[i+1].substr (0,pos) << " ";
+        cout << productos[i].get_nombre() << " ";
     }
     cout << "}\n";
 }
@@ -316,9 +312,10 @@ int main(int argc, char const *argv[])
     if (f.is_open())
     {
         ifstream fp(filenameProductos);
-        if (fp.is_open()){
-            bool esMatrizBinaria=cargar_grafo(f, grafo);
-            map<int, string> productos;
+        if (fp.is_open())
+        {
+            bool esMatrizBinaria = cargar_grafo(f, grafo);
+            vector<Producto> productos(grafo.n_vertices);
             cargar_productos(fp, productos);
             Grafo _g;
 
@@ -353,7 +350,8 @@ int main(int argc, char const *argv[])
             std::cout << "Tiempo transcurrido del algoritmo: " << elapsed << " segundos." << std::endl;
             fp.close();
         }
-        else{
+        else
+        {
             cerr << "No se ha podido abrir el fichero de productos\n";
         }
         f.close();

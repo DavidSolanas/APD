@@ -37,15 +37,10 @@ class Arista
 public:
     // Cada arista se representa por los 2 vertices (v1 < v2 siempre)
     int v1, v2;
-    // El peso de la arista representara el numero de veces que los objetos v1 y v2
-    // hayan sido comprados juntos, en caso de que los datos de entrada asi lo expresen
-    // En caso de que los datos de entrada sean 0 o 1, el peso tendra el valor 1
-    int peso;
 
     //Constructor, siempre se asigna a v1 el menor de los valores de los parámetros
-    Arista(const int _v1, const int _v2, const int _peso)
+    Arista(const int _v1, const int _v2)
     {
-        peso = _peso;
         if (_v1 < _v2)
         {
             v1 = _v1;
@@ -56,10 +51,6 @@ public:
             v1 = _v2;
             v2 = _v1;
         }
-    }
-    const bool operator<(const Arista &a) const
-    {
-        return peso < a.peso;
     }
 
     const bool operator==(const Arista &a) const
@@ -96,12 +87,10 @@ public:
 
 //Obtiene directamente del fichero el grafo correspondiente
 // Leemos solo triangulo superior de la matriz
-bool cargar_grafo(ifstream &f, Grafo &grafo)
+void cargar_grafo(ifstream &f, Grafo &grafo)
 {
     int num_productos;
     int valorArista;
-    bool conexo;
-    bool esMatrizBinaria = true; //Si encuenta uno o mas numeros >1, esMatrizBinaria=false
 
     f >> num_productos;
     grafo.n_vertices = num_productos;
@@ -117,11 +106,12 @@ bool cargar_grafo(ifstream &f, Grafo &grafo)
             desconectado = desconectado & (valorArista == 0);
             if (j < i && valorArista > 0) //Si es arista se añade al grafo
             {
-                if (valorArista != 1)
+                Arista a(i, j);
+                //Añade la arista tántas veces como se ha comprado con el producto j
+                for (int i = 0; i < valorArista; i++)
                 {
-                    esMatrizBinaria = false;
+                    grafo.aristas.push_back(a);
                 }
-                grafo.aristas.push_back(Arista(i, j, valorArista));
                 grafo.vertices[i] = Vertice(i);
                 grafo.vertices[j] = Vertice(j);
             }
@@ -130,12 +120,6 @@ bool cargar_grafo(ifstream &f, Grafo &grafo)
             grafo.conexo = false;
     }
     grafo.n_aristas = grafo.aristas.size();
-    if (esMatrizBinaria)
-    {
-        grafo.aristas.sort();
-    }
-
-    return esMatrizBinaria;
 }
 
 /**
@@ -176,7 +160,7 @@ void merge(Grafo &G, const int index)
     G.n_aristas = G.aristas.size();
 }
 
-Grafo karger(const Grafo &G, const bool esMatrizBinaria)
+Grafo karger(const Grafo &G)
 {
     std::random_device rd;
     std::mt19937 mt(rd());
@@ -184,29 +168,20 @@ Grafo karger(const Grafo &G, const bool esMatrizBinaria)
     int i;
     while (_G.n_vertices > 2)
     {
-        // seleccionar arista aletoriamente
-        if (esMatrizBinaria)
-        {
-            std::uniform_int_distribution<int> dist(0, min(_G.n_aristas - 1, 5)); //¿Como favorecemos que se elijan las aristas mas pesadas?
-            i = dist(mt);                                                         //De momento esta puesto que coja una de las 5 primeras, ya que la lista esta ordenada, pero no se
-        }
-        else
-        {
-            std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
-            i = dist(mt);
-        }
+        std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
+        i = dist(mt);
         merge(_G, i);
     }
     return _G;
 }
 
-Grafo rep_karger(const Grafo &G, const bool esMatrizBinaria, const int n)
+Grafo rep_karger(const Grafo &G, const int n)
 {
     Grafo best_G;
     best_G.n_aristas = G.n_aristas;
     for (int i = 0; i < n; i++)
     {
-        Grafo _G = karger(G, esMatrizBinaria);
+        Grafo _G = karger(G);
         if (_G.n_aristas < best_G.n_aristas)
         {
             best_G = _G;
@@ -233,18 +208,18 @@ Grafo contract(const Grafo &G, const int t)
     return _G;
 }
 
-Grafo karger_stein(const Grafo &G, const bool esMatrizBinaria)
+Grafo karger_stein(const Grafo &G)
 {
     if (G.n_vertices <= 6)
     {
-        return karger(G, esMatrizBinaria);
+        return karger(G);
     }
     else
     {
         int t = ceil(1 + G.n_vertices / M_SQRT2);
         Grafo G1 = contract(G, t);
         Grafo G2 = contract(G, t);
-        return min(karger_stein(G1, esMatrizBinaria), karger_stein(G2, esMatrizBinaria));
+        return min(karger_stein(G1), karger_stein(G2));
     }
 }
 
@@ -314,7 +289,7 @@ int main(int argc, char const *argv[])
         ifstream fp(filenameProductos);
         if (fp.is_open())
         {
-            bool esMatrizBinaria = cargar_grafo(f, grafo);
+            cargar_grafo(f, grafo);
             vector<Producto> productos(grafo.n_vertices);
             cargar_productos(fp, productos);
             Grafo _g;
@@ -326,7 +301,7 @@ int main(int argc, char const *argv[])
             if (grafo.conexo)
             {
                 //_g = karger_stein(grafo);
-                _g = karger(grafo, esMatrizBinaria);
+                _g = karger(grafo);
                 int _v1 = _g.aristas.front().v1;
                 int _v2 = _g.aristas.front().v2;
                 list<int> v1 = _g.vertices[_v1].vertices;

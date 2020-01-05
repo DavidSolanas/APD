@@ -6,6 +6,7 @@
 #include "Productos.hpp"
 #include <cmath>
 #include <ctime>
+#include <cstring>
 
 using namespace std;
 
@@ -126,13 +127,16 @@ void cargar_grafo(ifstream &f, Grafo &grafo)
  * Junta los dos vértices de la arista a en el nodo de menor índice de a
  * y actualiza las aristas del grafo G que apuntaban a esos dos vértices.
  */
-void merge(Grafo &G, const int index)
+void merge(Grafo &G, const int index, const bool verbose)
 {
     auto e = G.aristas.begin();
     std::advance(e, index);
 
     const int new_v = (*e).v1;
     const int v = (*e).v2;
+
+    if (verbose)
+        cout << "Contrayendo arista: <" << new_v << "---" << v << ">" << endl;
 
     // Actualiza el número de vértices del grafo G
     G.n_vertices--;
@@ -160,7 +164,7 @@ void merge(Grafo &G, const int index)
     G.n_aristas = G.aristas.size();
 }
 
-Grafo karger(const Grafo &G)
+Grafo karger(const Grafo &G, const bool verbose)
 {
     std::random_device rd;
     std::mt19937 mt(rd());
@@ -170,18 +174,18 @@ Grafo karger(const Grafo &G)
     {
         std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
         i = dist(mt);
-        merge(_G, i);
+        merge(_G, i, verbose);
     }
     return _G;
 }
 
-Grafo rep_karger(const Grafo &G, const int n)
+Grafo rep_karger(const Grafo &G, const int n, const bool verbose)
 {
     Grafo best_G;
     best_G.n_aristas = G.n_aristas;
     for (int i = 0; i < n; i++)
     {
-        Grafo _G = karger(G);
+        Grafo _G = karger(G, verbose);
         if (_G.n_aristas < best_G.n_aristas)
         {
             best_G = _G;
@@ -193,7 +197,7 @@ Grafo rep_karger(const Grafo &G, const int n)
 /**
  * Aplica la contracción de aristas hasta que el garfo G tiene t vértices
  */
-Grafo contract(const Grafo &G, const int t)
+Grafo contract(const Grafo &G, const int t, const bool verbose)
 {
     std::random_device rd;
     std::mt19937 mt(rd());
@@ -203,23 +207,23 @@ Grafo contract(const Grafo &G, const int t)
         // seleccionar arista aletoriamente
         std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
         int i = dist(mt);
-        merge(_G, i);
+        merge(_G, i, verbose);
     }
     return _G;
 }
 
-Grafo karger_stein(const Grafo &G)
+Grafo karger_stein(const Grafo &G, const bool verbose)
 {
     if (G.n_vertices <= 6)
     {
-        return karger(G);
+        return karger(G, verbose);
     }
     else
     {
         int t = ceil(1 + G.n_vertices / M_SQRT2);
-        Grafo G1 = contract(G, t);
-        Grafo G2 = contract(G, t);
-        return min(karger_stein(G1), karger_stein(G2));
+        Grafo G1 = contract(G, t, verbose);
+        Grafo G2 = contract(G, t, verbose);
+        return min(karger_stein(G1, verbose), karger_stein(G2, verbose));
     }
 }
 
@@ -272,9 +276,9 @@ void mostrar_conjuntos(list<int> v1, list<int> v2, vector<Producto> &productos)
 
 int main(int argc, char const *argv[])
 {
-    string usage = "Uso: ./pract1 <fichero_datos> <fichero_productos>";
+    string usage = "Uso: ./pract1 <fichero_datos> <fichero_productos> [-v] [-a {karger, karger-stein, karger-extendido}]";
     Grafo grafo;
-    if (argc != 3)
+    if (argc < 3)
     {
         cerr << "Número incorrecto de parámetros" << std::endl;
         cerr << usage << std::endl;
@@ -283,6 +287,36 @@ int main(int argc, char const *argv[])
 
     string filenameDatos = argv[1];
     string filenameProductos = argv[2];
+    int algortimo = 0; //karger normal (0), karger-stein (1), karger-extendido(2)
+    bool verbose = false;
+
+    for (int i = 3; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-v") == 0)
+            verbose = true;
+        if (strcmp(argv[i], "-a") == 0)
+        {
+            if (i + 1 == argc)
+            {
+                cerr << "Debe introducir los parámetros correctamente" << std::endl;
+                cerr << usage << std::endl;
+                exit(1);
+            }
+            else
+            {
+                if (strcmp(argv[i + 1], "karger-stein") == 0)
+                {
+                    algortimo = 1;
+                }
+                if (strcmp(argv[i + 1], "karger-extendido") == 0)
+                {
+                    algortimo = 2;
+                }
+                i++;
+            }
+        }
+    }
+
     ifstream f(filenameDatos);
     if (f.is_open())
     {
@@ -300,8 +334,15 @@ int main(int argc, char const *argv[])
 
             if (grafo.conexo)
             {
-                //_g = karger_stein(grafo);
-                _g = karger(grafo);
+                switch (algortimo)
+                {
+                case 1:
+                    _g = karger_stein(grafo, verbose);
+                    break;
+                default:
+                    _g = karger(grafo, verbose);
+                    break;
+                }
                 int _v1 = _g.aristas.front().v1;
                 int _v2 = _g.aristas.front().v2;
                 list<int> v1 = _g.vertices[_v1].vertices;

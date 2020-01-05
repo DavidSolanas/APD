@@ -37,10 +37,15 @@ class Arista
 public:
     // Cada arista se representa por los 2 vertices (v1 < v2 siempre)
     int v1, v2;
+    // El peso de la arista representara el numero de veces que los objetos v1 y v2
+    // hayan sido comprados juntos, en caso de que los datos de entrada asi lo expresen
+    // En caso de que los datos de entrada sean 0 o 1, el peso tendra el valor 1
+    int peso;
 
     //Constructor, siempre se asigna a v1 el menor de los valores de los parámetros
-    Arista(const int _v1, const int _v2)
+    Arista(const int _v1, const int _v2, const int _peso)
     {
+        peso=_peso;
         if (_v1 < _v2)
         {
             v1 = _v1;
@@ -93,11 +98,12 @@ public:
 
 //Obtiene directamente del fichero el grafo correspondiente
 // Leemos solo triangulo superior de la matriz
-void cargar_grafo(ifstream &f, Grafo &grafo)
+bool cargar_grafo(ifstream &f, Grafo &grafo)
 {
     int num_productos;
-    bool esArista;
+    int valorArista;
     bool conexo;
+    bool esMatrizBinaria = true; //Si encuenta uno o mas numeros >1, esMatrizBinaria=false
 
     f >> num_productos;
     grafo.n_vertices = num_productos;
@@ -109,11 +115,15 @@ void cargar_grafo(ifstream &f, Grafo &grafo)
         bool desconectado = true;
         for (int j = 0; j < num_productos; j++)
         {
-            f >> esArista;
-            desconectado = desconectado & !esArista;
-            if (j < i && esArista)
+            f >> valorArista;
+            //desconectado = desconectado & !esArista;
+            desconectado = desconectado & valorArista==0;
+            if (j < i && valorArista > 0) //Si es arista se añade al grafo
             {
-                grafo.aristas.push_back(Arista(i, j));
+                if (valorArista != 1){
+                    esMatrizBinaria = false;
+                }
+                grafo.aristas.push_back(Arista(i, j, valorArista));
                 grafo.vertices[i] = Vertice(i);
                 grafo.vertices[j] = Vertice(j);
             }
@@ -122,6 +132,11 @@ void cargar_grafo(ifstream &f, Grafo &grafo)
             grafo.conexo = false;
     }
     grafo.n_aristas = grafo.aristas.size();
+    if (esMatrizBinaria){
+        grafo.aristas.sort();                   //  ¿PODRIA CAMBIAR LA SOBRECARGA DEL OPERADOR < PARA QUE ORDENE SEGUN EL PESO DE LA ARISTA?
+    }
+
+    return esMatrizBinaria;
 }
 
 /**
@@ -162,29 +177,35 @@ void merge(Grafo &G, const int index)
     G.n_aristas = G.aristas.size();
 }
 
-Grafo karger(const Grafo &G)
+Grafo karger(const Grafo &G, const bool esMatrizBinaria)
 {
     std::random_device rd;
     std::mt19937 mt(rd());
     Grafo _G(G.n_vertices, G.n_aristas, G.aristas, G.vertices);
-
+    int i;
     while (_G.n_vertices > 2)
     {
         // seleccionar arista aletoriamente
-        std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
-        int i = dist(mt);
+        if (esMatrizBinaria){
+            std::uniform_int_distribution<int> dist(0, min(_G.n_aristas - 1, 5));   //¿Como favorecemos que se elijan las aristas mas pesadas? 
+            i = dist(mt);                                         //De momento esta puesto que coja una de las 5 primeras, ya que la lista esta ordenada, pero no se
+        }
+        else{
+            std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
+            i = dist(mt);
+        }
         merge(_G, i);
     }
     return _G;
 }
 
-Grafo rep_karger(const Grafo &G, const int n)
+Grafo rep_karger(const Grafo &G, const bool esMatrizBinaria, const int n)
 {
     Grafo best_G;
     best_G.n_aristas = G.n_aristas;
     for (int i = 0; i < n; i++)
     {
-        Grafo _G = karger(G);
+        Grafo _G = karger(G, esMatrizBinaria);
         if (_G.n_aristas < best_G.n_aristas)
         {
             best_G = _G;
@@ -211,26 +232,27 @@ Grafo contract(const Grafo &G, const int t)
     return _G;
 }
 
-Grafo karger_stein(const Grafo &G)
+Grafo karger_stein(const Grafo &G , const bool esMatrizBinaria)
 {
     if (G.n_vertices <= 6)
     {
-        return karger(G);
+        return karger(G, esMatrizBinaria);
     }
     else
     {
         int t = ceil(1 + G.n_vertices / M_SQRT2);
         Grafo G1 = contract(G, t);
         Grafo G2 = contract(G, t);
-        return min(karger_stein(G1), karger_stein(G2));
+        return min(karger_stein(G1, esMatrizBinaria), karger_stein(G2, esMatrizBinaria));
     }
 }
 
-void cargar_productos(ifstream &f, map<int, string> &productos, int num_productos)
+void cargar_productos(ifstream &f, map<int, string> &productos /*, int num_productos*/)
 {
     int clave;
     string valor, aux;
-    for (int i = 0; i < num_productos; i++)
+    //for (int i = 0; i < num_productos; i++)
+    while (!f.eof())
     {
         f >> clave; //ID del producto
         f >> aux;   //nombre
@@ -259,18 +281,20 @@ void calcular_desconectado(const Grafo &G, list<int> &v1, list<int> &v2)
     }
 }
 
-void mostrar_conjuntos(list<int> v1, list<int> v2)
+void mostrar_conjuntos(list<int> v1, list<int> v2,  map<int, string> &productos)
 {
-    cout << "Conjunto vértices 1: {  ";
+    cout << "Conjunto productos Amazon:    {  ";
     for (auto &&i : v1)
     {
-        cout << i << "  ";
+        size_t pos = productos[i+1].find("-");
+        cout << productos[i+1].substr (0,pos) << " ";
     }
     cout << "}\n";
-    cout << "Conjunto vértices 2: {  ";
+    cout << "Conjunto productos Amazonymas: {  ";
     for (auto &&i : v2)
     {
-        cout << i << "  ";
+        size_t pos = productos[i+1].find("-");
+        cout << productos[i+1].substr (0,pos) << " ";
     }
     cout << "}\n";
 }
@@ -291,37 +315,47 @@ int main(int argc, char const *argv[])
     ifstream f(filenameDatos);
     if (f.is_open())
     {
-        cargar_grafo(f, grafo);
-        Grafo _g;
+        ifstream fp(filenameProductos);
+        if (fp.is_open()){
+            bool esMatrizBinaria=cargar_grafo(f, grafo);
+            map<int, string> productos;
+            cargar_productos(fp, productos);
+            Grafo _g;
 
-        //Medir tiempo algoritmo
-        struct timespec start, finish;
-        clock_gettime(CLOCK_REALTIME, &start);
+            //Medir tiempo algoritmo
+            struct timespec start, finish;
+            clock_gettime(CLOCK_REALTIME, &start);
 
-        if (grafo.conexo)
-        {
-            _g = karger_stein(grafo);
-            int _v1 = _g.aristas.front().v1;
-            int _v2 = _g.aristas.front().v2;
-            list<int> v1 = _g.vertices[_v1].vertices;
-            list<int> v2 = _g.vertices[_v2].vertices;
-            mostrar_conjuntos(v1, v2);
+            if (grafo.conexo)
+            {
+                //_g = karger_stein(grafo);
+                _g = karger(grafo, esMatrizBinaria);
+                int _v1 = _g.aristas.front().v1;
+                int _v2 = _g.aristas.front().v2;
+                list<int> v1 = _g.vertices[_v1].vertices;
+                list<int> v2 = _g.vertices[_v2].vertices;
+                mostrar_conjuntos(v1, v2, productos);
+            }
+            else
+            {
+                //Calcular solución manualmente
+                list<int> v1; //Conjunto de vértices 1 (conectados)
+                list<int> v2; //Conjunto de vértices 2 (desconectados)
+                calcular_desconectado(grafo, v1, v2);
+                mostrar_conjuntos(v1, v2, productos);
+            }
+
+            // Obtener tiempo de ejecución
+            clock_gettime(CLOCK_REALTIME, &finish);
+            double elapsed = (finish.tv_sec - start.tv_sec);
+            elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+            cout << "Corte mínimo calculado: " << _g.n_aristas << endl;
+            std::cout << "Tiempo transcurrido del algoritmo: " << elapsed << " segundos." << std::endl;
+            fp.close();
         }
-        else
-        {
-            //Calcular solución manualmente
-            list<int> v1; //Conjunto de vértices 1 (conectados)
-            list<int> v2; //Conjunto de vértices 2 (desconectados)
-            calcular_desconectado(grafo, v1, v2);
-            mostrar_conjuntos(v1, v2);
+        else{
+            cerr << "No se ha podido abrir el fichero de productos\n";
         }
-
-        // Obtener tiempo de ejecución
-        clock_gettime(CLOCK_REALTIME, &finish);
-        double elapsed = (finish.tv_sec - start.tv_sec);
-        elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-        cout << "Corte mínimo calculado: " << _g.n_aristas << endl;
-        std::cout << "Tiempo transcurrido del algoritmo: " << elapsed << " segundos." << std::endl;
         f.close();
     }
     else

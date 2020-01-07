@@ -267,25 +267,29 @@ Grafo karger_stein(const Grafo &G, const bool verbose)
  * de todos los  productos con el que se va a trabajar, y los almacena 
  * en el vector productos
  */
-void cargar_productos(ifstream &f, vector<Producto> &productos)
+void cargar_productos(ifstream &f, vector<Producto> &productos, const int num_productos)
 {
     std::string nombre;
     int unidades;
     double precio;
-    int i = 0;
-    while (!f.eof())
+    //int i = 0;
+    //while (!f.eof())
+    for (int i=0; i < num_productos; i++)
     {
         f >> nombre;   //nombre
         f >> precio;   //precio
         f >> unidades; //unidades disponibles
-        productos[i++] = Producto(nombre, unidades, precio);
+        //productos[i++] = Producto(nombre, unidades, precio);
+        productos[i] = Producto(nombre, unidades, precio);
     }
 }
 
 /*
  * En caso de que el grafo no sea conexo, no hace falta aplicar el algoritmo,
  * por lo que calcular_desconectado calcula manualmente los dos grupos de 
- * vertices y los devuelve en las listas enlazadas v1 y v2
+ * vertices y los devuelve en las listas enlazadas v1 y v2. Introduce en v1
+ * aquellos vertices que tengan al menos una arista con otro vertice, y en v2
+ * los vertices desconectados del grafo.
  */
 void calcular_desconectado(const Grafo &G, list<int> &v1, list<int> &v2)
 {
@@ -376,7 +380,7 @@ int main(int argc, char const *argv[])
         {
             cargar_grafo(f, grafo); //Obtiene el grafo a partir del fichero
             vector<Producto> productos(grafo.n_vertices);
-            cargar_productos(fp, productos); //Obtiene el vector de productos
+            cargar_productos(fp, productos, grafo.n_vertices); //Obtiene el vector de productos
             Grafo _g;
 
             //Medir tiempo algoritmo
@@ -399,6 +403,7 @@ int main(int argc, char const *argv[])
                 list<int> v1 = _g.vertices[_v1].vertices;
                 list<int> v2 = _g.vertices[_v2].vertices;
                 mostrar_conjuntos(v1, v2, productos);
+                cout << "Corte mínimo calculado: " << _g.n_aristas << endl;
             }
             else
             {
@@ -407,13 +412,13 @@ int main(int argc, char const *argv[])
                 list<int> v2; //Conjunto de vértices 2 (desconectados)
                 calcular_desconectado(grafo, v1, v2);
                 mostrar_conjuntos(v1, v2, productos);
+                cout << "Corte mínimo calculado: 0 (grafo NO conexo)"   << endl;
             }
 
             // Obtener tiempo de ejecución
             clock_gettime(CLOCK_REALTIME, &finish);
             double elapsed = (finish.tv_sec - start.tv_sec);
             elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-            cout << "Corte mínimo calculado: " << _g.n_aristas << endl;
             std::cout << "Tiempo transcurrido del algoritmo: " << elapsed << " segundos." << std::endl;
             fp.close();
         }

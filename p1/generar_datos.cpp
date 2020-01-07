@@ -1,3 +1,9 @@
+/************************************************
+ * Autores: Santiago Buey, David Solanas        *
+ * Fichero: generar_datos.cpp                   *
+ * Práctica 1 - APD                             *
+ ************************************************/
+
 #include <iostream>
 #include <random>
 #include <cmath>

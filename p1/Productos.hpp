@@ -9,12 +9,16 @@
 
 #include <iostream>
 
+/*
+ * Clase que representa los productos de Amazon 
+ * con los que se va a trabajar
+ */
 class Producto
 {
 private:
-    std::string nombre;
-    int unidades;
-    double precio;
+    std::string nombre; //Nombre del producto
+    int unidades; //Unidades restantes del producto
+    double precio; //Precio del producto
 
 public:
     Producto() {}

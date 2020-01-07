@@ -1,3 +1,9 @@
+/************************************************
+ * Autores: Santiago Buey, David Solanas        *
+ * Fichero: pract1.cpp                       *
+ * Práctica 1 - APD                             *
+ ************************************************/
+
 #include <iostream>
 #include <random>
 #include <fstream>
@@ -10,12 +16,16 @@
 
 using namespace std;
 
+/*
+ * Clase para representar cada uno de los vertices del grafo
+ */
 class Vertice
 {
 public:
     int raiz;
     list<int> vertices;
 
+    //Constructores:
     Vertice() { raiz = -1; }
     Vertice(const int v) : raiz(v) { vertices.push_back(v); }
     Vertice(const int v, list<int> _Vertices) : raiz(v), vertices(_Vertices) {}
@@ -31,8 +41,10 @@ public:
         return this->raiz == n.raiz;
     }
 };
-
-// Estructura de datos para representar cada una de las aristas del grafo
+ 
+/*
+ * Clase para representar cada una de las aristas del grafo
+ */
 class Arista
 {
 public:
@@ -65,14 +77,17 @@ public:
     }
 };
 
-// Estructura de datos para representar el grafo sobre el que aplicamos Karger
+/*
+ *  Clase con la que se va a representar el grafo sobre el que 
+ *  se va a aplicaer el algoritmo de Karger para encontrar el corte minimo
+ */
 class Grafo
 {
 public:
     int n_vertices; // Numero de vertices
     int n_aristas;  // Numero de aristas
-    bool conexo;
-    list<Arista> aristas;     // Grafo representado como un conjunto de aristas
+    bool conexo;    // Es true sii el grafo no contiene ningun vertice desconectado
+    list<Arista> aristas;     //Conjunto de aristas del grafo
     vector<Vertice> vertices; //Conjunto de vertices del grafo
 
     //Constructor
@@ -86,18 +101,21 @@ public:
     }
 };
 
-//Obtiene directamente del fichero el grafo correspondiente
-// Leemos solo triangulo superior de la matriz
+/*
+ * Obtiene del fichero de entrada asociado al flujo f el grafo
+ * sobre el que se va a aplicar el algoritmo de Karger
+ */
 void cargar_grafo(ifstream &f, Grafo &grafo)
 {
     int num_productos;
     int valorArista;
-
-    f >> num_productos;
+    //La primera linea especifica el numero de productos, por tanto, de vertices:
+    f >> num_productos; 
     grafo.n_vertices = num_productos;
     grafo.vertices.resize(num_productos);
+    //El grafo es conexo mientras no se encuentre ningun vertice desconectado
     grafo.conexo = true;
-
+    //Recorre la matriz del fichero de entrada
     for (int i = 0; i < num_productos; i++)
     {
         bool desconectado = true;
@@ -105,10 +123,11 @@ void cargar_grafo(ifstream &f, Grafo &grafo)
         {
             f >> valorArista;
             desconectado = desconectado & (valorArista == 0);
+            // condicion j<i para solo tener en cuenta el triangulo inferior de la matriz
             if (j < i && valorArista > 0) //Si es arista se añade al grafo
             {
                 Arista a(i, j);
-                //Añade la arista tántas veces como se ha comprado con el producto j
+                //Añade la arista tántas veces como se ha comprado con el producto j (Karger extendido)
                 for (int i = 0; i < valorArista; i++)
                 {
                     grafo.aristas.push_back(a);
@@ -123,7 +142,7 @@ void cargar_grafo(ifstream &f, Grafo &grafo)
     grafo.n_aristas = grafo.aristas.size();
 }
 
-/**
+/*
  * Junta los dos vértices de la arista a en el nodo de menor índice de a
  * y actualiza las aristas del grafo G que apuntaban a esos dos vértices.
  */
@@ -149,7 +168,7 @@ void merge(Grafo &G, const int index, const bool verbose)
         (*it).v1 = (*it).v1 == v ? new_v : (*it).v1;
         (*it).v2 = (*it).v2 == v ? new_v : (*it).v2;
 
-        //Self loop
+        //Self loop (borra las aristas reflexivas)
         if ((*it).v1 == (*it).v2)
         {
             it = G.aristas.erase(it);
@@ -161,24 +180,35 @@ void merge(Grafo &G, const int index, const bool verbose)
 
         it++;
     }
-    G.n_aristas = G.aristas.size();
+    G.n_aristas = G.aristas.size(); //Actualiza al nuevo numero de aristas
 }
 
+/*
+ * Algoritmo de Karger: Elige aleatoriamente una de las aristas del grafo,
+ * fusiona (merge) los dos vertices que la componen, y se eliminan las
+ * aristas reflexivas que puedan aparecer. El proceso se repite hasta que
+ * solo queden 2 vertices en el grafo
+ */
 Grafo karger(const Grafo &G, const bool verbose)
 {
     std::random_device rd;
     std::mt19937 mt(rd());
     Grafo _G(G.n_vertices, G.n_aristas, G.aristas, G.vertices);
     int i;
-    while (_G.n_vertices > 2)
+    while (_G.n_vertices > 2) //Mientras queden mas de 2 vertices en el grafo
     {
         std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
-        i = dist(mt);
-        merge(_G, i, verbose);
+        i = dist(mt); //Elige la arista aleatoriamente
+        merge(_G, i, verbose); //Fusiona los dos vertices de la arista elegida
     }
     return _G;
 }
 
+/*
+ * Dado que el algoritmo de Karger es probabilista (Monte Carlo), esta funcion
+ * lo ejecuta n veces, quedandose siempre con el corte minimo de las ejecuciones.
+ * De esta forma se reduce la probabilidad de error.
+ */
 Grafo rep_karger(const Grafo &G, const int n, const bool verbose)
 {
     Grafo best_G;
@@ -194,7 +224,7 @@ Grafo rep_karger(const Grafo &G, const int n, const bool verbose)
     return best_G;
 }
 
-/**
+/*
  * Aplica la contracción de aristas hasta que el garfo G tiene t vértices
  */
 Grafo contract(const Grafo &G, const int t, const bool verbose)
@@ -207,26 +237,36 @@ Grafo contract(const Grafo &G, const int t, const bool verbose)
         // seleccionar arista aletoriamente
         std::uniform_int_distribution<int> dist(0, _G.n_aristas - 1);
         int i = dist(mt);
-        merge(_G, i, verbose);
+        merge(_G, i, verbose); //Fusiona los dos vertices de la arista elegida
     }
     return _G;
 }
 
+/*
+ * Mejora del algoritmo de Karger, en vez de contraer hasta llegar a 2 vertices
+ * contrae hasta llegar a un valor t calculado
+ */
 Grafo karger_stein(const Grafo &G, const bool verbose)
 {
     if (G.n_vertices <= 6)
     {
-        return karger(G, verbose);
+        return karger(G, verbose); //En los casos pequeños devuelve karger normal
     }
     else
     {
-        int t = ceil(1 + G.n_vertices / M_SQRT2);
+        int t = ceil(1 + G.n_vertices / M_SQRT2); //Calculo de t
         Grafo G1 = contract(G, t, verbose);
         Grafo G2 = contract(G, t, verbose);
+        //Se elige el minimo de las dos llamadas recursivas (con G1 y G2)
         return min(karger_stein(G1, verbose), karger_stein(G2, verbose));
     }
 }
 
+/*
+ * Obtiene del fichero de entrada asociado al flujo f el listado
+ * de todos los  productos con el que se va a trabajar, y los almacena 
+ * en el vector productos
+ */
 void cargar_productos(ifstream &f, vector<Producto> &productos)
 {
     std::string nombre;
@@ -242,6 +282,11 @@ void cargar_productos(ifstream &f, vector<Producto> &productos)
     }
 }
 
+/*
+ * En caso de que el grafo no sea conexo, no hace falta aplicar el algoritmo,
+ * por lo que calcular_desconectado calcula manualmente los dos grupos de 
+ * vertices y los devuelve en las listas enlazadas v1 y v2
+ */
 void calcular_desconectado(const Grafo &G, list<int> &v1, list<int> &v2)
 {
     for (int i = 0; i < G.vertices.size(); i++)
@@ -258,6 +303,11 @@ void calcular_desconectado(const Grafo &G, list<int> &v1, list<int> &v2)
     }
 }
 
+/*
+ * Procedimiento que escribe por la salida estándar la solucion obtenida
+ * por el algoritmo, indicando el valor del minimo corte ademas de qué productos 
+ * deberan estar en Amazon y cuales en Amazonymas
+ */
 void mostrar_conjuntos(list<int> v1, list<int> v2, vector<Producto> &productos)
 {
     cout << "Conjunto productos Amazon:    {  ";
@@ -273,6 +323,7 @@ void mostrar_conjuntos(list<int> v1, list<int> v2, vector<Producto> &productos)
     }
     cout << "}\n";
 }
+
 
 int main(int argc, char const *argv[])
 {
@@ -323,9 +374,9 @@ int main(int argc, char const *argv[])
         ifstream fp(filenameProductos);
         if (fp.is_open())
         {
-            cargar_grafo(f, grafo);
+            cargar_grafo(f, grafo); //Obtiene el grafo a partir del fichero
             vector<Producto> productos(grafo.n_vertices);
-            cargar_productos(fp, productos);
+            cargar_productos(fp, productos); //Obtiene el vector de productos
             Grafo _g;
 
             //Medir tiempo algoritmo

@@ -12,6 +12,19 @@ int main(int argc, char const *argv[])
 
     crear_grupos_de_sufijos("processing", s0, s1, s2);
     mostrar_grupos(s0, s1, s2);
+    vector<string> R;
+    R.push_back("roc");
+    R.push_back("ess");
+    R.push_back("ing");
+    R.push_back("oce");
+    R.push_back("ssi");
+    R.push_back("ng*");
+    radix_sort(R);
+
+    for (auto &&i : R)
+    {
+        cout << i << endl;
+    }
 
     return 0;
 }

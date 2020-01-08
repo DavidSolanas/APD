@@ -109,4 +109,47 @@ void mostrar_grupos(vector<Sufijo> &s0, vector<Sufijo> &s1, vector<Sufijo> &s2)
     }
 }
 
+vector<int> counting_sort(vector<string> &R, const int i)
+{
+    const int k = 256; //Número de letras del alfabeto (tabla ASCII)
+    // Inicializar contador
+    int C[k] = {0};
+    vector<int> B(R.size());
+    //Contar frequencias
+    for (int j = 0; j < R.size(); j++)
+    {
+        C[R[j].at(i)]++;
+    }
+    //Contar el número de elementos menores o iguales que el j-ésimo
+    for (int j = 1; j < k; j++)
+    {
+        C[j] = C[j] + C[j - 1];
+    }
+
+    //Calcular la posición de cada elemento en el vector ordenado
+    for (int j = R.size() - 1; j >= 0; j--)
+    {
+        B[C[R[j].at(i)] - 1] = j;
+        C[R[j].at(i)]--;
+    }
+    return B;
+}
+
+/**
+ * Algoritmo Radix Sort para 3-gramas
+ */
+void radix_sort(vector<string> &R)
+{
+    for (int i = 2; i >= 0; i--)
+    {
+        vector<int> B = counting_sort(R, i);
+        vector<string> aux = R;
+        for (int j = 0; j < B.size(); j++)
+        {
+            R[j] = aux[B[j]];
+        }
+        cout << endl;
+    }
+}
+
 #endif // !VECTOR_SUFIJOS_HPP

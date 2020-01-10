@@ -12,11 +12,14 @@
 
 using namespace std;
 
+/**
+ * Clase que representa la estructura de datos de un sufijo
+ */
 class Sufijo
 {
 private:
-    int indice;
-    string sufijo;
+    int indice;     //Posicion del sufijo en el vector
+    string sufijo;  //Contenido del sufijo
 
 public:
     Sufijo(const int i, const string &s);
@@ -80,7 +83,7 @@ void crear_grupos_de_sufijos(const string &t, vector<Sufijo> &s0, vector<Sufijo>
     const int len = t.size();
     for (int q = 0; 3 * q < len; q++)
     {
-        s0.push_back(Sufijo(3 * q, t.substr(3 * q, len)));
+        s0.push_back(Sufijo(3 * q, t.substr(3 * q, len))); //substr(inicio,numCaracteres a incluir)
         if (3 * q + 1 < len)
             s1.push_back(Sufijo(3 * q + 1, t.substr(3 * q + 1, len)));
         if (3 * q + 2 < len)
@@ -115,7 +118,7 @@ vector<int> counting_sort(vector<string> &R, const int i)
     // Inicializar contador
     int C[k] = {0};
     vector<int> B(R.size());
-    //Contar frequencias
+    //Contar frecuencias (num de elementos de cada tipo)
     for (int j = 0; j < R.size(); j++)
     {
         C[R[j].at(i)]++;

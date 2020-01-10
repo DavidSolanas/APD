@@ -4,87 +4,95 @@
 using namespace std;
 
 /**
- * Lexicographic order for pairs.
+ * Devuelve cierto si el par (x1,x2) es menor que el par (y1,y2)
+ * comparando x1 con y1 y x2 con y2.
  */
-bool leq(int a1, int a2, int b1, int b2)
+bool cmp_par(int x1, int x2, int y1, int y2)
 {
-    return (a1 < b1 || (a1 == b1 && a2 <= b2));
+    return (x1 < y1 || (x1 == y1 && x2 <= y2));
 }
 
 /**
- * Lexicographic order for triples.
+ * Devuelve cierto si la tripleta (x1,x2,x3) es menor que la tripleta (y1,y2,y3)
+ * comparando x1 con y1, x2 con y2 y x3 con y3.
  */
-bool leq(int a1, int a2, int a3, int b1, int b2, int b3)
+bool cmp_tripleta(int x1, int x2, int x3, int y1, int y2, int y3)
 {
-    return (a1 < b1 || (a1 == b1 && leq(a2, a3, b2, b3)));
+    return (x1 < y1 || (x1 == y1 && cmp_par(x2, x3, y2, y3)));
 }
 
 /**
- * Determine the maximum value in a slice of an array.
+ * Devuelve el valor máximo del vector de enteros v de tamaño n
+ * se considera que todos los valores de v son enteros positivos.
  */
-int max(int *input, int start, int length)
+int max(int *v, int n)
 {
-    if (length < 1)
-        return -1;
-
-    int max = input[start];
-    for (int i = start + 1; i < length; i++)
+    int max = -1;
+    for (int i = 0; i < n; i++)
     {
-        int v = input[i];
-        max = v > max ? v : max;
+        int val = v[i];
+        max = val > max ? val : max;
     }
-
     return max;
 }
 
 /**
- * Stably sort indexes from src[0..n-1] to dst[0..n-1] with values in 0..K from v. A
- * constant offset of <code>vi</code> is added to indexes from src.
+ * Aplica el algoritmo de radix sort para ordenar el vector src con los valores del
+ * vector v (de 0 a K).
  */
-void radixPass(int *src, int *dst, int *v, int vi,
-               int n, int K, int start, int *cnt)
+void radix_sort(int *src, int *dst, int *v, int offset,
+                int n, int K, int start)
 {
-
+    int cnt[K + 2];
     // Inicializar contador
     for (int i = 0; i < K + 2; i++)
     {
         cnt[i] = 0;
     }
 
-    // count occurrences
+    // Contar ocurrencias de los caracteres
     for (int i = 0; i < n; i++)
-        cnt[v[start + vi + src[i]]]++;
-
-    // exclusive prefix sums
-    for (int i = 0, sum = 0; i <= K; i++)
     {
-        int t = cnt[i];
-        cnt[i] = sum;
-        sum += t;
+        int caracter = v[start + offset + src[i]];
+        cnt[caracter]++;
     }
 
-    // sort
+    // Contar el número de elementos menores o iguales que el i-ésimo
+    for (int i = 0, suma = 0; i <= K; i++)
+    {
+        int t = cnt[i];
+        cnt[i] = suma;
+        suma += t;
+    }
+
+    // Ordenar el vector src almacenando el resultado en dst
     for (int i = 0; i < n; i++)
-        dst[cnt[v[start + vi + src[i]]]++] = src[i];
+    {
+        //Carácter
+        int caracter = v[start + offset + src[i]];
+        //Nueva posición en el vector del sufijo src[i]
+        int j = cnt[caracter]++;
+        dst[j] = src[i];
+    }
 }
 
 /**
- * Find the suffix array SA of s[0..n-1] in {1..K}^n. require s[n] = s[n+1] = s[n+2] =
- * 0, n >= 2.
+ * Calcula el vector de sufijos dado el vector de enteros (caracteres) s.
  */
-int *suffixArray(int *s, int *SA, int n, int K, int start, int *cnt)
+void vector_sufijo(int *s, int *SA, int n, int K, int start)
 {
     int n0 = (n + 2) / 3, n1 = (n + 1) / 3, n2 = n / 3, n02 = n0 + n2;
     int *s12 = new int[n02 + 3];
     s12[n02] = s12[n02 + 1] = s12[n02 + 2] = 0;
+
     int *SA12 = new int[n02 + 3];
     SA12[n02] = SA12[n02 + 1] = SA12[n02 + 2] = 0;
+
     int *s0 = new int[n0];
     int *SA0 = new int[n0];
 
     /*
-    * generate positions of mod 1 and mod 2 suffixes the "+(n0-n1)" adds a dummy mod
-    * 1 suffix if n%3 == 1
+    * Genera las posiciones no múltiplos de 3 de los sufijos de la entrada s
     */
     for (int i = 0, j = 0; i < n + (n0 - n1); i++)
     {
@@ -92,75 +100,80 @@ int *suffixArray(int *s, int *SA, int n, int K, int start, int *cnt)
             s12[j++] = i;
     }
 
-    // lsb radix sort the mod 1 and mod 2 triples
-    radixPass(s12, SA12, s, +2, n02, K, start, cnt);
-    radixPass(SA12, s12, s, +1, n02, K, start, cnt);
-    radixPass(s12, SA12, s, +0, n02, K, start, cnt);
+    // Aplica radix sort a las tripletas de los sufijos de s
+    radix_sort(s12, SA12, s, +2, n02, K, start);
+    radix_sort(SA12, s12, s, +1, n02, K, start);
+    radix_sort(s12, SA12, s, +0, n02, K, start);
 
-    // find lexicographic names of triples
-    int name = 0, c0 = -1, c1 = -1, c2 = -1;
+    // Calcular el rango (rank) de las tripletas ordenadas
+    // c0, c1 y c2 se usan para comparar dos tripletas y ver que son
+    // distintas, si son distintas, se incrementa el rango, si son iguales
+    // se le pone el mismo rango y habrá que aplicar recursividad
+    int rank = 0, c0_ant = -1, c1_ant = -1, c2_ant = -1;
     for (int i = 0; i < n02; i++)
     {
-        if (s[start + SA12[i]] != c0 || s[start + SA12[i] + 1] != c1 || s[start + SA12[i] + 2] != c2)
-        {
-            name++;
-            c0 = s[start + SA12[i]];
-            c1 = s[start + SA12[i] + 1];
-            c2 = s[start + SA12[i] + 2];
+        if (s[start + SA12[i]] != c0_ant || s[start + SA12[i] + 1] != c1_ant || s[start + SA12[i] + 2] != c2_ant)
+        { // Tripletas distintas
+            rank++;
+            c0_ant = s[start + SA12[i]];
+            c1_ant = s[start + SA12[i] + 1];
+            c2_ant = s[start + SA12[i] + 2];
         }
-
         if ((SA12[i] % 3) == 1)
         {
-            // left half
-            s12[SA12[i] / 3] = name;
+            // Mitad izquierda
+            s12[SA12[i] / 3] = rank;
         }
         else
         {
-            // right half
-            s12[SA12[i] / 3 + n0] = name;
+            // Mitad derecha
+            s12[SA12[i] / 3 + n0] = rank;
         }
     }
 
-    // recurse if names are not yet unique
-    if (name < n02)
+    // Si rank < n02 implica que había alguna tripleta repetida,
+    // sino hubieran sido todas distintas y sería igual a n02.
+    // Hay que aplicar recursividad para eliminar las repetidas
+    if (rank < n02)
     {
-        cnt = suffixArray(s12, SA12, n02, name, start, cnt);
-        // store unique names in s12 using the suffix array
+        vector_sufijo(s12, SA12, n02, rank, start);
+        // Guardar los valores únicos en s12 usando el vector de sufijos
         for (int i = 0; i < n02; i++)
             s12[SA12[i]] = i + 1;
     }
     else
     {
-        // generate the suffix array of s12 directly
+        // Generar vector de sufijos
         for (int i = 0; i < n02; i++)
             SA12[s12[i] - 1] = i;
     }
-
-    // stably sort the mod 0 suffixes from SA12 by their first character
+    // Ordenar los sufijos de posición múltiplo de 3 de SA12 por su primer carácter
     for (int i = 0, j = 0; i < n02; i++)
+    {
         if (SA12[i] < n0)
             s0[j++] = 3 * SA12[i];
-    radixPass(s0, SA0, s, 0, n0, K, start, cnt);
+    }
+    radix_sort(s0, SA0, s, 0, n0, K, start);
 
-    // merge sorted SA0 suffixes and sorted SA12 suffixes
+    // Mezclar SA0 y SA12
     for (int p = 0, t = n0 - n1, k = 0; k < n; k++)
     {
-        // pos of current offset 12 suffix
+        // Posición del sufijo t-ésimo de SA12
         int i = (SA12[t] < n0 ? SA12[t] * 3 + 1 : (SA12[t] - n0) * 3 + 2);
-        // pos of current offset 0 suffix
+        // Posición del sufijo p-ésimo de SA0
         int j = SA0[p];
 
-        if (SA12[t] < n0 ? leq(s[start + i], s12[SA12[t] + n0], s[start + j],
-                               s12[j / 3])
-                         : leq(s[start + i], s[start + i + 1], s12[SA12[t] - n0 + 1],
-                               s[start + j], s[start + j + 1], s12[j / 3 + n0]))
+        if (SA12[t] < n0 ? cmp_par(s[start + i], s12[SA12[t] + n0], s[start + j],
+                                   s12[j / 3])
+                         : cmp_tripleta(s[start + i], s[start + i + 1], s12[SA12[t] - n0 + 1],
+                                        s[start + j], s[start + j + 1], s12[j / 3 + n0]))
         {
-            // suffix from SA12 is smaller
+            // El sufijo de SA12 es menor que el de SA0
             SA[k] = i;
             t++;
             if (t == n02)
             {
-                // done --- only SA0 suffixes left
+                // Solo quedan los sufijos de SA0
                 for (k++; p < n0; p++, k++)
                     SA[k] = SA0[p];
             }
@@ -171,7 +184,7 @@ int *suffixArray(int *s, int *SA, int n, int K, int start, int *cnt)
             p++;
             if (p == n0)
             {
-                // done --- only SA12 suffixes left
+                // Solo quedan los sufijos de SA12
                 for (k++; t < n02; t++, k++)
                 {
                     SA[k] = (SA12[t] < n0 ? SA12[t] * 3 + 1 : (SA12[t] - n0) * 3 + 2);
@@ -179,13 +192,11 @@ int *suffixArray(int *s, int *SA, int n, int K, int start, int *cnt)
             }
         }
     }
-
-    return cnt;
 }
 
-int *buildSuffixArray(int *input, int start, int length)
+int *crear_vector_sufijos(int *input, int start, int length)
 {
-    int alphabetSize = max(input, start, length);
+    int alphabetSize = max(input, length);
     int *SA = new int[length + 3];
     int *_in = new int[length + 3];
 
@@ -196,7 +207,7 @@ int *buildSuffixArray(int *input, int start, int length)
     }
     _in[length] = _in[length + 1] = _in[length + 2] = 0;
 
-    suffixArray(_in, SA, length, alphabetSize, start, new int[alphabetSize + 2]);
+    vector_sufijo(_in, SA, length, alphabetSize, start);
 
     return SA;
 }
@@ -209,7 +220,7 @@ int main(int argc, char const *argv[])
     {
         b[i] = (int)input.at(i);
     }
-    int *suffix_array = buildSuffixArray(b, 0, input.length());
+    int *suffix_array = crear_vector_sufijos(b, 0, input.length());
 
     for (int i = 0; i < input.length(); i++)
     {

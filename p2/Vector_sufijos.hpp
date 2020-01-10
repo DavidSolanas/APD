@@ -121,7 +121,9 @@ vector<int> counting_sort(vector<string> &R, const int i)
     //Contar frecuencias (num de elementos de cada tipo)
     for (int j = 0; j < R.size(); j++)
     {
-        C[R[j].at(i)]++;
+        //Comprobación de rango del string
+        int v = i >= R[j].size() ? 0 : R[j].at(i);
+        C[v]++;
     }
     //Contar el número de elementos menores o iguales que el j-ésimo
     for (int j = 1; j < k; j++)
@@ -132,8 +134,9 @@ vector<int> counting_sort(vector<string> &R, const int i)
     //Calcular la posición de cada elemento en el vector ordenado
     for (int j = R.size() - 1; j >= 0; j--)
     {
-        B[C[R[j].at(i)] - 1] = j;
-        C[R[j].at(i)]--;
+        int v = i >= R[j].size() ? 0 : R[j].at(i);
+        B[C[v] - 1] = j;
+        C[v]--;
     }
     return B;
 }
@@ -151,7 +154,6 @@ void radix_sort(vector<string> &R)
         {
             R[j] = aux[B[j]];
         }
-        cout << endl;
     }
 }
 

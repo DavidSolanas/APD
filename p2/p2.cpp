@@ -6,8 +6,27 @@
 
 #include "Vector_sufijos.hpp"
 
+
+void transformadaBW (const Vector_sufijos &vs, const string input){
+    int len = vs.getSize();
+    string transformada="";
+
+    int i;
+    for (int i=0; i < len; i++){
+        //Pilla el ultimo caracter
+    }
+
+
+} 
+
+
 int main(int argc, char const *argv[])
 {
+    string filenameIn = argv[1];
+    string filenameOut = argv[2];
+
+    
+
     vector<Sufijo> s0, s1, s2;
 
     crear_grupos_de_sufijos("processing", s0, s1, s2);
@@ -28,6 +47,8 @@ int main(int argc, char const *argv[])
     {
         cout << i << endl;
     }
+
+
 
     return 0;
 }

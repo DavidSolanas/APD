@@ -75,6 +75,10 @@ Vector_sufijos::Vector_sufijos(const int size)
     }
 }
 
+int getSize (const Vector_sufijos &vs){
+    return vs.size;
+}
+
 /**
  * Crea los grupos de sufijos S0, S1 y S2 dado el texto t
  */

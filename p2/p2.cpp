@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cstring>
 
 using namespace std;
@@ -25,12 +26,12 @@ bool cmp_tripleta(int x1, int x2, int x3, int y1, int y2, int y3)
  * Devuelve el valor máximo del vector de enteros v de tamaño n
  * se considera que todos los valores de v son enteros positivos.
  */
-int max(int *v, int n)
+int max(unsigned char *v, int n)
 {
     int max = -1;
     for (int i = 0; i < n; i++)
     {
-        int val = v[i];
+        int val = (int)v[i];
         max = val > max ? val : max;
     }
     return max;
@@ -194,7 +195,7 @@ void vector_sufijo(int *s, int *SA, int n, int K, int start)
     }
 }
 
-int *crear_vector_sufijos(int *input, int start, int length)
+int *crear_vector_sufijos(unsigned char *input, int start, int length)
 {
     int alphabetSize = max(input, length);
     int *SA = new int[length + 3];
@@ -203,7 +204,7 @@ int *crear_vector_sufijos(int *input, int start, int length)
     //Añadir a la entrada 3 carácteres nulos para preservar los 3-gramas
     for (int i = 0; i < length; i++)
     {
-        _in[i] = input[i];
+        _in[i] = (int)input[i];
     }
     _in[length] = _in[length + 1] = _in[length + 2] = 0;
 
@@ -212,17 +213,41 @@ int *crear_vector_sufijos(int *input, int start, int length)
     return SA;
 }
 
+/**
+ * Devuelve el tamaño del fichero f en Bytes.
+ */
+int tamanyo_fichero(ifstream &f)
+{
+    f.clear();
+    f.seekg(0, f.end);
+    int tam = f.tellg();
+    f.seekg(0, f.beg);
+    return tam;
+}
+
 int main(int argc, char const *argv[])
 {
-    string input = "GACCCACCACC";
-    int b[input.length()];
-    for (int i = 0; i < input.length(); i++)
+    string usage = "Uso: ./p2 <fichero>";
+    if (argc < 2)
     {
-        b[i] = (int)input.at(i);
+        cerr << "Número incorrecto de parámetros" << std::endl;
+        cerr << usage << std::endl;
+        exit(1);
     }
-    int *suffix_array = crear_vector_sufijos(b, 0, input.length());
+    ifstream f_entrada(argv[1]);
+    if (!f_entrada.is_open())
+    {
+        cerr << "Imposible abrir el fichero de entrada, cancelando..." << endl;
+        exit(1);
+    }
 
-    for (int i = 0; i < input.length(); i++)
+    int tam = tamanyo_fichero(f_entrada);
+    unsigned char *contenido = (unsigned char *)malloc(tam);
+    f_entrada.read((char *)contenido, tam);
+    f_entrada.close();
+
+    int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
+    for (int i = 0; i < tam; i++)
     {
         cout << suffix_array[i] << endl;
     }

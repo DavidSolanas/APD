@@ -226,16 +226,15 @@ int tamanyo_fichero(ifstream &f)
 }
 
 
-void transformadaBW (const Vector_sufijos &vs, const string input){
-    int len = vs.getSize();
-    string transformada="";
+char *transformadaBW (int *suffix_array, unsigned char *input, const int tam){
+    unsigned char *transformada = (unsigned char *)malloc(tam * sizeof(char));
 
     int i;
-    for (int i=0; i < len; i++){
-        //Pilla el ultimo caracter
+    for (int i=0; i < tam; i++){
+        transformada[i]= input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
     }
-
-
+    transformada[i]= '\0'; //Finaliza la cadena con el caracter nulo
+    return transformada;
 }
 
 
@@ -262,10 +261,10 @@ int main(int argc, char const *argv[])
 
     int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
     for (int i = 0; i < tam; i++)
-    {
-        cout << suffix_array[i] << endl;
+    {   
+        //cout << suffix_array[i] << endl;
     }
-
+    char *transformada= transformadaBW(suffix_array,contenido,tam);
 
 
     return 0;

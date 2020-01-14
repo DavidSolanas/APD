@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
-
 using namespace std;
 
 /**
@@ -225,12 +224,47 @@ int tamanyo_fichero(ifstream &f)
     return tam;
 }
 
+/**
+ * Transforma input en una cadena de enteros, segun el algoritmo Move To Front
+ */
+int *moveToFront(unsigned char *input, const int tam, const char *diccionario, const int dimDiccionario){
+    int *seqIndices = (int *)malloc(tam * sizeof(int));
+    char *simbolos = (char *)malloc(dimDiccionario * sizeof(char)); 
+    strcpy(simbolos, diccionario); //Crea una copia manteniendo el diccionario original
+    
+    for (int i=0; i < tam; i++){    //Para cada caracter de la cadena input
+        unsigned char c = input[i]; 
+        bool found = false;
+        int j = 0;
+        while (!found && j < dimDiccionario){
+            if (simbolos[j] == c){
+                found= true;
+                seqIndices[i]= j; 
+                //Desplaza una posicion a la derecha hasta llegar al indice:
+                strncpy(simbolos + 1, simbolos, j);
+                simbolos[0]= c; //Coloca el caracter en la posicion 0 (front)
+            }
+            else{
+                j++;
+            }
+        }
+        if(!found){
+            cerr << "ERROR: Caracter " << c << " no encontrado en la tabla ASCII\n";
+            exit(1);
+        }
 
-char *transformadaBW (int *suffix_array, unsigned char *input, const int tam){
+    }
+    cout << simbolos << endl;
+    return seqIndices;
+}
+
+/**
+ * Calcula la transformada de Burrows-Wheeler
+ */
+unsigned char *transformadaBW (int *suffix_array, unsigned char *input, const int tam){
     unsigned char *transformada = (unsigned char *)malloc(tam * sizeof(char));
-
     int i;
-    for (int i=0; i < tam; i++){
+    for (i=0; i < tam; i++){
         transformada[i]= input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
     }
     transformada[i]= '\0'; //Finaliza la cadena con el caracter nulo
@@ -262,10 +296,24 @@ int main(int argc, char const *argv[])
     int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
     for (int i = 0; i < tam; i++)
     {   
-        //cout << suffix_array[i] << endl;
+//        cout << suffix_array[i] << endl;
     }
-    char *transformada= transformadaBW(suffix_array,contenido,tam);
+    unsigned char *transformada= transformadaBW(suffix_array,contenido,tam);
+
+    //Genera el diccionario a utilizar: los caracteres de la tabla ASCII
+    char *diccionario = (char *)malloc(257 * sizeof(char));
+    int i;
+    for (i=1; i < 256; i++){ //Empieza desde 1 para no pillar el caracter nulo ('\0')
+        diccionario[i]= (char)i;
+    }
+    diccionario[i]= '\0';
+
+    int *mtf= moveToFront(contenido, tam, diccionario, 257);
+    for(int i=0; i<tam; i++){
+        cout << mtf[i] << endl;
+    }
 
 
+    f_entrada.close();
     return 0;
 }

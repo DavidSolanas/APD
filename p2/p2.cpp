@@ -224,37 +224,37 @@ int tamanyo_fichero(ifstream &f)
     return tam;
 }
 
+
+int buscarIndice(char c, char *diccionario, const int dimDiccionario, int indiceC){
+    int i;
+    for (i=0; i < dimDiccionario; i++){
+        if (diccionario[i] == c){
+            return i;
+            break;
+        }
+    }
+    if (i==dimDiccionario){
+        cout << "Valor de i:    " << indiceC << endl;
+        cerr << "ERROR: No se encuentra el caracter " << c << endl;
+        exit(1);
+    }
+}
+
 /**
  * Transforma input en una cadena de enteros, segun el algoritmo Move To Front
  */
-int *moveToFront(unsigned char *input, const int tam, const char *diccionario, const int dimDiccionario){
+int *moveToFront(unsigned char *input, const int tam, char *diccionario, const int dimDiccionario){
     int *seqIndices = (int *)malloc(tam * sizeof(int));
-    char *simbolos = (char *)malloc(dimDiccionario * sizeof(char)); 
-    strcpy(simbolos, diccionario); //Crea una copia manteniendo el diccionario original
     
     for (int i=0; i < tam; i++){    //Para cada caracter de la cadena input
-        unsigned char c = input[i]; 
-        bool found = false;
-        int j = 0;
-        while (!found && j < dimDiccionario){
-            if (simbolos[j] == c){
-                found= true;
-                seqIndices[i]= j; 
-                //Desplaza una posicion a la derecha hasta llegar al indice:
-                strncpy(simbolos + 1, simbolos, j);
-                simbolos[0]= c; //Coloca el caracter en la posicion 0 (front)
-            }
-            else{
-                j++;
-            }
-        }
-        if(!found){
-            cerr << "ERROR: Caracter " << c << " no encontrado en la tabla ASCII\n";
-            exit(1);
-        }
+        seqIndices[i]= buscarIndice(input[i], diccionario, dimDiccionario, i);
 
+        char* aux = (char*)malloc(sizeof(char) * dimDiccionario);
+        strcpy(aux, diccionario);
+        char c = diccionario[seqIndices[i]];
+        strncpy(diccionario+1, aux, seqIndices[i]);
+        diccionario[0] = c;
     }
-    cout << simbolos << endl;
     return seqIndices;
 }
 
@@ -307,6 +307,11 @@ int main(int argc, char const *argv[])
         diccionario[i]= (char)i;
     }
     diccionario[i]= '\0';
+
+    for (int i=1; i<256;i++){
+//        cout << diccionario[i] << endl;
+    }
+    //cout << diccionario[47] << endl;
 
     int *mtf= moveToFront(contenido, tam, diccionario, 257);
     for(int i=0; i<tam; i++){

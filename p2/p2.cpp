@@ -224,35 +224,48 @@ int tamanyo_fichero(ifstream &f)
     return tam;
 }
 
-
-int buscarIndice(char c, char *diccionario, const int dimDiccionario, int indiceC){
+int buscarIndice(unsigned char c, unsigned char *diccionario, const int dimDiccionario, int indiceC)
+{
     int i;
-    for (i=0; i < dimDiccionario; i++){
-        if (diccionario[i] == c){
+    for (i = 0; i < dimDiccionario; i++)
+    {
+        if (diccionario[i] == c)
+        {
             return i;
-            break;
         }
     }
-    if (i==dimDiccionario){
+    if (i == dimDiccionario)
+    {
         cout << "Valor de i:    " << indiceC << endl;
         cerr << "ERROR: No se encuentra el caracter " << c << endl;
         exit(1);
+    }
+    return -1;
+}
+
+inline void strcpy(unsigned char *dst, const unsigned char *src, const int dim)
+{
+    for (int i = 0; i < dim; i++)
+    {
+        dst[i] = src[i];
     }
 }
 
 /**
  * Transforma input en una cadena de enteros, segun el algoritmo Move To Front
  */
-int *moveToFront(unsigned char *input, const int tam, char *diccionario, const int dimDiccionario){
+int *moveToFront(unsigned char *input, const int tam, unsigned char *diccionario, const int dimDiccionario)
+{
     int *seqIndices = (int *)malloc(tam * sizeof(int));
-    
-    for (int i=0; i < tam; i++){    //Para cada caracter de la cadena input
-        seqIndices[i]= buscarIndice(input[i], diccionario, dimDiccionario, i);
 
-        char* aux = (char*)malloc(sizeof(char) * dimDiccionario);
-        strcpy(aux, diccionario);
-        char c = diccionario[seqIndices[i]];
-        strncpy(diccionario+1, aux, seqIndices[i]);
+    for (int i = 0; i < tam; i++)
+    { //Para cada caracter de la cadena input
+        seqIndices[i] = buscarIndice(input[i], diccionario, dimDiccionario, i);
+
+        unsigned char *aux = (unsigned char *)malloc(sizeof(char) * dimDiccionario);
+        strcpy(aux, diccionario, dimDiccionario);
+        unsigned char c = diccionario[seqIndices[i]];
+        strcpy(diccionario, aux, seqIndices[i]);
         diccionario[0] = c;
     }
     return seqIndices;
@@ -261,16 +274,17 @@ int *moveToFront(unsigned char *input, const int tam, char *diccionario, const i
 /**
  * Calcula la transformada de Burrows-Wheeler
  */
-unsigned char *transformadaBW (int *suffix_array, unsigned char *input, const int tam){
+unsigned char *transformadaBW(int *suffix_array, unsigned char *input, const int tam)
+{
     unsigned char *transformada = (unsigned char *)malloc(tam * sizeof(char));
     int i;
-    for (i=0; i < tam; i++){
-        transformada[i]= input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
+    for (i = 0; i < tam; i++)
+    {
+        transformada[i] = input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
     }
-    transformada[i]= '\0'; //Finaliza la cadena con el caracter nulo
+    transformada[i] = '\0'; //Finaliza la cadena con el caracter nulo
     return transformada;
 }
-
 
 int main(int argc, char const *argv[])
 {
@@ -294,31 +308,23 @@ int main(int argc, char const *argv[])
     f_entrada.close();
 
     int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
-    for (int i = 0; i < tam; i++)
-    {   
-//        cout << suffix_array[i] << endl;
-    }
-    unsigned char *transformada= transformadaBW(suffix_array,contenido,tam);
+
+    unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
 
     //Genera el diccionario a utilizar: los caracteres de la tabla ASCII
-    char *diccionario = (char *)malloc(257 * sizeof(char));
+    unsigned char *diccionario = (unsigned char *)malloc(257 * sizeof(char));
     int i;
-    for (i=1; i < 256; i++){ //Empieza desde 1 para no pillar el caracter nulo ('\0')
-        diccionario[i]= (char)i;
+    for (i = 1; i < 256; i++)
+    { //Empieza desde 1 para no pillar el caracter nulo ('\0')
+        diccionario[i] = (unsigned char)i;
     }
-    diccionario[i]= '\0';
+    diccionario[i] = '\0';
 
-    for (int i=1; i<256;i++){
-//        cout << diccionario[i] << endl;
-    }
-    //cout << diccionario[47] << endl;
-
-    int *mtf= moveToFront(contenido, tam, diccionario, 257);
-    for(int i=0; i<tam; i++){
-        cout << mtf[i] << endl;
+    int *mtf = moveToFront(contenido, tam, diccionario, 257);
+    for (int i = 0; i < tam; i++)
+    {
+        //cout << mtf[i] << endl;
     }
 
-
-    f_entrada.close();
     return 0;
 }

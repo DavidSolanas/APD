@@ -5,11 +5,8 @@
 using namespace std;
 
 // Variables auxiliares para determinar fin de un string (caracteres que no pueden estar en el texto)
+//const int NULO = 0x00;
 const int NULO = 0x00;
-
-//--------------------------FUNCIONES HUFFMAN:--------------------------
-
-//----------------------Fin de las FUNCIONES HUFFMAN----------------------
 
 /**
  * Devuelve cierto si el par (x1,x2) es menor que el par (y1,y2)
@@ -450,7 +447,7 @@ int main(int argc, char const *argv[])
         int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
         unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
         unsigned char *mtf = moveToFront(transformada, tam, diccionario, dimDiccionario);
-        comprimir(argv[2], contenido, tam);
+        comprimir(argv[2], mtf, tam);
     }
     else if (string(argv[1]) == "-d")   //DESCOMPRIMIR
     { 
@@ -459,9 +456,7 @@ int main(int argc, char const *argv[])
         int tam_original;
 
         unsigned char *descomprimido = descomprimir(nom_fichero, tam_original);
-        cout << descomprimido << endl;
         unsigned char *mtfInverso= moveToFrontInverso(descomprimido, tam, diccionarioOriginal, dimDiccionario);
-        cout << mtfInverso << endl;
         unsigned char *inversaBurrows = inversaBW(mtfInverso, tam, dimDiccionario);
 
         ofstream f_salida;

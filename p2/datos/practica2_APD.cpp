@@ -320,7 +320,7 @@ unsigned char *transformadaBW(int *suffix_array, unsigned char *input, const int
     int i;
     for (i = 0; i < tam; i++)
     {
-        transformada[i] = input[(suffix_array[i] - 1 + tam) % tam];  //Calcula el ultimo caracter
+        transformada[i] = input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
     }
     transformada[i] = NULO; //Finaliza la cadena con el caracter nulo
     return transformada;
@@ -351,10 +351,10 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
         }
     }
     //Almacena el numero de los caracteres que se van detectando:
-    int *aparicionesC = (int *)malloc(dimDiccionario * sizeof(int));
+    int *index_acumulado = (int *)malloc(dimDiccionario * sizeof(int));
     for (int i = 0; i < dimDiccionario; i++)
     {
-        aparicionesC[i] = 0;
+        index_acumulado[i] = 0;
     }
 
     //index almacena el numero de la ocurrencia del caracter
@@ -362,7 +362,7 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
     for (int i = 0; i < tam; i++)
     {
         unsigned char ti = input[i];
-        index[i] = aparicionesC[ti]++;
+        index[i] = index_acumulado[ti]++;
     }
 
     //LF = C + i

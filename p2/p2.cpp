@@ -6,8 +6,6 @@ using namespace std;
 
 //--------------------------FUNCIONES HUFFMAN:--------------------------
 
-
-
 //----------------------Fin de las FUNCIONES HUFFMAN----------------------
 
 /**
@@ -266,27 +264,28 @@ inline void strcpy(unsigned char *dst, const unsigned char *src, const int dim)
  * Mueve el caracter que ocupa la posicion indice en la cadena diccionario
  * a la posicion 0 de esta
  */
-void moverDelante (int indice, unsigned char *diccionario, const int dimDiccionario){
+void moverDelante(int indice, unsigned char *diccionario, const int dimDiccionario)
+{
     unsigned char *aux = (unsigned char *)malloc(dimDiccionario * sizeof(unsigned char));
     strcpy(aux, diccionario, dimDiccionario); //Copia todos los caracteres de diccionario en aux
     unsigned char c = diccionario[indice];
     strcpy(diccionario + 1, aux, indice); //Copia todos los caracteres hasta el indice encontrado
-    diccionario[0]= c;
+    diccionario[0] = c;
 }
 
 /**
  * Transforma input en una cadena de enteros, segun el algoritmo Move To Front
  */
 unsigned char *moveToFront(unsigned char *input, const int tam, unsigned char *diccionario, const int dimDiccionario)
-{   
+{
     unsigned char *seqIndices = (unsigned char *)malloc(tam * sizeof(unsigned char));
     //int *seqIndices = (int *)malloc(tam * sizeof(int));
-    
+
     int indice;
     for (int i = 0; i < tam; i++)
     { //Para cada caracter de la cadena input
         indice = buscarIndice(input[i], diccionario, dimDiccionario, i);
-        seqIndices[i]= (char)indice;
+        seqIndices[i] = (char)indice;
         moverDelante(indice, diccionario, dimDiccionario);
     }
     return seqIndices;
@@ -295,15 +294,17 @@ unsigned char *moveToFront(unsigned char *input, const int tam, unsigned char *d
 /**
  * 
  */
-unsigned char *moveToFrontInverso (unsigned char *seqIndices, const int tam, unsigned char *diccionario, const int dimDiccionario){
+unsigned char *moveToFrontInverso(unsigned char *seqIndices, const int tam, unsigned char *diccionario, const int dimDiccionario)
+{
     unsigned char *mtfInverso = (unsigned char *)malloc(tam * sizeof(unsigned char));
 
-//    cout << seqIndices << endl;
+    //    cout << seqIndices << endl;
 
-    for (int i=0; i < tam; i++){
-        int indice= seqIndices[i];
-//        cout << indice << endl;
-        mtfInverso[i]= diccionario[indice];
+    for (int i = 0; i < tam; i++)
+    {
+        int indice = seqIndices[i];
+        //        cout << indice << endl;
+        mtfInverso[i] = diccionario[indice];
 
         moverDelante(indice, diccionario, dimDiccionario);
     }
@@ -328,27 +329,23 @@ unsigned char *transformadaBW(int *suffix_array, unsigned char *input, const int
 /**
  * 
  */
-unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDiccionario){
+unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDiccionario)
+{
     // input: cadena codificada con BW
     // inversa: donde se va a almacenar la inversa BW de input
     unsigned char *inversa = (unsigned char *)malloc(tam * sizeof(unsigned char));
     //c[ti] almacena el numero de caracteres menores a ti
     int *c = (int *)malloc(tam * sizeof(int));
-    //cMenores[]
 
-    for (int i=0; i < tam; i++){
-        inversa[i]= '\0';
-    }
-
-//    cout << inversa << endl;
-
-//    cout << input << endl;
     // Bucle para rellenar c[] con la cuenta de menores a cada caracter
-    for (int i=0; i < tam; i++){
-        c[i]= 0;
+    for (int i = 0; i < tam; i++)
+    {
+        c[i] = 0;
         //unsigned char ti= input[i];
-        for (int j=0; j < tam; j++){
-            if (input[j] < input[i]){
+        for (int j = 0; j < tam; j++)
+        {
+            if (input[j] < input[i])
+            {
                 c[i]++;
             }
         }
@@ -356,42 +353,39 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
 
     //Para almacenar el numero de los caracteres que vamos detectando:
     int *index_acumulado = (int *)malloc(dimDiccionario * sizeof(int));
-    for (int i=0; i < dimDiccionario; i++){
-        index_acumulado[i]= 0;
-    }
-    //index almacena el numero de la ocurrencia del caracter
-    int *index = (int *)malloc(tam * sizeof(int));
-    for (int i=0; i < tam; i++){
-        unsigned char ti = input[i];
-        index[i]= index_acumulado[ti];
-        index_acumulado[ti] = index_acumulado[ti] + 1;
+    for (int i = 0; i < dimDiccionario; i++)
+    {
+        index_acumulado[i] = 0;
     }
 
+    //index almacena el numero de la ocurrencia del caracter
+    int *index = (int *)malloc(tam * sizeof(int));
+    for (int i = 0; i < tam; i++)
+    {
+        unsigned char ti = input[i];
+        index[i] = index_acumulado[ti]++;
+    }
 
     //LF = C + i
     int *LF = (int *)malloc(tam * sizeof(int));
-    for (int i=0; i < tam; i++){
-        LF[i]= c[i] + index[i];
+    for (int i = 0; i < tam; i++)
+    {
+        LF[i] = c[i] + index[i];
     }
 
     //DECODIFICAMOS:
-    int r= 0;
-    unsigned char cd = input[r];
+    int r = 0;
     int i;
-    for (i=0; i < tam; i++){
+    for (i = tam - 1; i >= 0; i--)
+    {
         //inversa = cd + inversa;
-        inversa[i]= cd;
+        inversa[i] = input[r];
         r = LF[r];
-        cd = input[r];
-        
     }
-    inversa[i]= '\0';
-    cout << inversa << endl;
+    inversa[tam] = '\0';
 
-//    cout << inversa << endl;
     return inversa;
 }
-
 
 int main(int argc, char const *argv[])
 {
@@ -414,53 +408,46 @@ int main(int argc, char const *argv[])
     f_entrada.read((char *)contenido, tam);
     f_entrada.close();
 
-    const int dimDiccionario= 257;
+    const int dimDiccionario = 257;
     //Genera el diccionario a utilizar: los caracteres de la tabla ASCII
     unsigned char *diccionario = (unsigned char *)malloc(dimDiccionario * sizeof(unsigned char));
     unsigned char *diccionarioOriginal = (unsigned char *)malloc(dimDiccionario * sizeof(unsigned char));
     int i;
-    for (i = 1; i < 256; i++){ //Empieza desde 1 para no pillar el caracter nulo ('\0')
+    for (i = 1; i < 256; i++)
+    { //Empieza desde 1 para no pillar el caracter nulo ('\0')
         diccionario[i] = (unsigned char)i;
     }
     diccionario[i] = '\0';
     strcpy(diccionarioOriginal, diccionario, dimDiccionario);
 
-    if (string(argv[1])== "-c"){    //COMPRIMIR
+    if (string(argv[1]) == "-c")
+    { //COMPRIMIR
         int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
         unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
 
-        
         unsigned char *inversaBurrows = inversaBW(transformada, tam, dimDiccionario);
 
-        for (int i=0; i < tam; i++){
-//            cout << inversaBurrows[i] << endl;
-        }
+        //        unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
 
+        //        unsigned char *mtfInverso= moveToFrontInverso(mtf, tam, diccionarioOriginal, dimDiccionario);
 
-//        unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
-
-//        unsigned char *mtfInverso= moveToFrontInverso(mtf, tam, diccionarioOriginal, dimDiccionario);
-
-
-        comprimir(argv[2], contenido, tam);
-
+        //comprimir(argv[2], contenido, tam);
     }
-    else if (string(argv[1])== "-d"){   //DESCOMPRIMIR
-        string nom_fichero= argv[2];
-        string nom_salida = nom_fichero.substr(0, nom_fichero.length()-4);
+    else if (string(argv[1]) == "-d")
+    { //DESCOMPRIMIR
+        string nom_fichero = argv[2];
+        string nom_salida = nom_fichero.substr(0, nom_fichero.length() - 4);
         int tam_original;
-        unsigned char *descomprimido= descomprimir(nom_fichero, tam_original);
-        
-        
+        unsigned char *descomprimido = descomprimir(nom_fichero, tam_original);
 
         ofstream f_salida;
         f_salida.open(nom_salida, ios::binary);
-        f_salida.write((char*)descomprimido, tam_original);
+        f_salida.write((char *)descomprimido, tam_original);
         f_salida.close();
-
     }
-    else{
-        cout << "Opcion invalida: huf [-c|-d] <nombre_fichero>"<<endl;
+    else
+    {
+        cout << "Opcion invalida: huf [-c|-d] <nombre_fichero>" << endl;
     }
 
     return 0;

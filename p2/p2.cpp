@@ -406,7 +406,7 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
     }
     inversa[tam] = NULO;
 
-    int posDolar = buscar(input, tam +1, '$');
+    //int posDolar = buscar(input, tam +1, '$');
 
 
     return inversa;
@@ -445,34 +445,28 @@ int main(int argc, char const *argv[])
     diccionario[i] = '\0';
     strcpy(diccionarioOriginal, diccionario, dimDiccionario);
 
-    if (string(argv[1]) == "-c")
-    { //COMPRIMIR
+    if (string(argv[1]) == "-c")    //COMPRIMIR
+    { 
         int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
         unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
-        cout << transformada << endl;
-        unsigned char *inversaBurrows = inversaBW(transformada, tam, dimDiccionario);
-        for (int i = 0; i < tam; i++)
-        {
-            cout << inversaBurrows[i];
-        }
-        cout << endl;
-        //        unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
-
-        //unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
-        //unsigned char *mtfInverso= moveToFrontInverso(mtf, tam, diccionarioOriginal, dimDiccionario);
-
-        //comprimir(argv[2], contenido, tam);
+        unsigned char *mtf = moveToFront(transformada, tam, diccionario, dimDiccionario);
+        comprimir(argv[2], contenido, tam);
     }
-    else if (string(argv[1]) == "-d")
-    { //DESCOMPRIMIR
+    else if (string(argv[1]) == "-d")   //DESCOMPRIMIR
+    { 
         string nom_fichero = argv[2];
         string nom_salida = nom_fichero.substr(0, nom_fichero.length() - 4);
         int tam_original;
+
         unsigned char *descomprimido = descomprimir(nom_fichero, tam_original);
+        cout << descomprimido << endl;
+        unsigned char *mtfInverso= moveToFrontInverso(descomprimido, tam, diccionarioOriginal, dimDiccionario);
+        cout << mtfInverso << endl;
+        unsigned char *inversaBurrows = inversaBW(mtfInverso, tam, dimDiccionario);
 
         ofstream f_salida;
         f_salida.open(nom_salida, ios::binary);
-        f_salida.write((char *)descomprimido, tam_original);
+        f_salida.write((char *)inversaBurrows, tam_original);
         f_salida.close();
     }
     else

@@ -1,0 +1,16 @@
+Buey Utrilla, Santiago	747827@unizar.es	a747827
+Solanas Sanz, David	738630@unizar.es	a738630
+
+El programa está organizado en 4 ficheros C++:
+
+	- Arbol_caracteres.cpp: Codigo reciclado para la implementacion de Huffman
+
+	- huffman.cpp: Codigo reciclado para la implementacion de Huffman
+
+	- Monticulo_arboles.h: Codigo reciclado para la implementacion de Huffman
+	
+	- p2.cpp: 
+
+Para la compilación  basta con poner el siguiente comando: g++ p2.cpp -o bzip2
+
+Se dispone de un script "ejecutar2.sh" que realiza la compilación de los 3 programas y la ejecución de distintos casos de prueba (no todos) almacenados en la carpeta datos.

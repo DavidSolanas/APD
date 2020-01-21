@@ -334,23 +334,37 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
 {
     // input: cadena codificada con BW
     // inversa: donde se va a almacenar la inversa BW de input
-    unsigned char *inversa = (unsigned char *)malloc(tam * sizeof(unsigned char));
+    unsigned char *inversa = new unsigned char[tam];
     //c[ti] almacena el numero de caracteres menores a ti
-    int *c = (int *)malloc(tam * sizeof(int));
+    int *c = new int[tam];
+    int *freq = new int[dimDiccionario];
+
+    //Inicializamos el vector de frecuencias auxiliar
+    for (int i = 0; i < dimDiccionario; i++)
+    {
+        freq[i] = 0;
+    }
+    //Contamos la frecuencia de cada carácter de la entrada
+    for (int i = 0; i < tam; i++)
+    {
+        freq[input[i]]++;
+    }
 
     // Bucle para rellenar c[] con la cuenta de menores a cada caracter
+    //Para ello se usa el vector de frecuencias de caracteres calculado
+    //de forma que el numero menor de caracteres del caracter i-ésimo será
+    // los almacenados en freq desde 0 a i-1
     for (int i = 0; i < tam; i++)
     {
         c[i] = 0;
-        for (int j = 0; j < tam; j++)
+        int x = (int)input[i];
+        for (int j = 0; j < x; j++)
         {
-            if (input[j] < input[i])
-            {
-                c[i]++;
-            }
+            c[i] += freq[j];
         }
     }
-    //Almacena el numero de los caracteres que se van detectando:
+
+    //Para almacenar el numero de los caracteres que vamos detectando:
     int *aparicionesC = (int *)malloc(dimDiccionario * sizeof(int));
     for (int i = 0; i < dimDiccionario; i++)
     {
@@ -358,7 +372,7 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
     }
 
     //index almacena el numero de la ocurrencia del caracter
-    int *index = (int *)malloc(tam * sizeof(int));
+    int *index = new int[tam];
     for (int i = 0; i < tam; i++)
     {
         unsigned char ti = input[i];
@@ -366,22 +380,24 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
     }
 
     //LF = C + i
-    int *LF = (int *)malloc(tam * sizeof(int));
+    int *LF = new int[tam];
     for (int i = 0; i < tam; i++)
     {
         LF[i] = c[i] + index[i];
     }
 
-    //DECODIFICAR:
+    //DECODIFICAMOS:
     int r = 0;
     int i;
     for (i = tam - 1; i >= 0; i--)
     {
-        //Añade el caracter a la inversa
+        //inversa = cd + inversa;
         inversa[i] = input[r];
         r = LF[r];
     }
     inversa[tam] = NULO;
+
+    //int posDolar = buscar(input, tam +1, '$');
 
     return inversa;
 }

@@ -340,9 +340,6 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
         inversa[i]= '\0';
     }
 
-//    cout << inversa << endl;
-
-//    cout << input << endl;
     // Bucle para rellenar c[] con la cuenta de menores a cada caracter
     for (int i=0; i < tam; i++){
         c[i]= 0;
@@ -386,9 +383,7 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
         
     }
     inversa[i]= '\0';
-    cout << inversa << endl;
 
-//    cout << inversa << endl;
     return inversa;
 }
 
@@ -427,20 +422,8 @@ int main(int argc, char const *argv[])
 
     if (string(argv[1])== "-c"){    //COMPRIMIR
         int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
-        unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
-
-        
-        unsigned char *inversaBurrows = inversaBW(transformada, tam, dimDiccionario);
-
-        for (int i=0; i < tam; i++){
-//            cout << inversaBurrows[i] << endl;
-        }
-
-
-//        unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
-
-//        unsigned char *mtfInverso= moveToFrontInverso(mtf, tam, diccionarioOriginal, dimDiccionario);
-
+        unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);        
+        unsigned char *mtf = moveToFront(transformada, tam, diccionario, dimDiccionario);      
 
         comprimir(argv[2], contenido, tam);
 
@@ -451,11 +434,13 @@ int main(int argc, char const *argv[])
         int tam_original;
         unsigned char *descomprimido= descomprimir(nom_fichero, tam_original);
         
-        
+        unsigned char *mtfInverso= moveToFrontInverso(descomprimido, tam, diccionarioOriginal, dimDiccionario);
+
+        unsigned char *inversaBurrows = inversaBW(mtfInverso, tam, dimDiccionario);
 
         ofstream f_salida;
         f_salida.open(nom_salida, ios::binary);
-        f_salida.write((char*)descomprimido, tam_original);
+        f_salida.write((char*)inversaBurrows, tam_original);
         f_salida.close();
 
     }

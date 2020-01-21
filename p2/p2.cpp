@@ -4,6 +4,9 @@
 #include "huffman.cpp"
 using namespace std;
 
+// Variables auxiliares para determinar fin de un string (caracteres que no pueden estar en el texto)
+const int NULO = 0x00;
+
 //--------------------------FUNCIONES HUFFMAN:--------------------------
 
 //----------------------Fin de las FUNCIONES HUFFMAN----------------------
@@ -322,7 +325,7 @@ unsigned char *transformadaBW(int *suffix_array, unsigned char *input, const int
     {
         transformada[i] = input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
     }
-    transformada[i] = '\0'; //Finaliza la cadena con el caracter nulo
+    transformada[i] = NULO; //Finaliza la cadena con el caracter nulo
     return transformada;
 }
 
@@ -382,7 +385,7 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
         inversa[i] = input[r];
         r = LF[r];
     }
-    inversa[tam] = '\0';
+    inversa[tam] = NULO;
 
     return inversa;
 }
@@ -404,10 +407,10 @@ int main(int argc, char const *argv[])
     }
 
     int tam = tamanyo_fichero(f_entrada);
-    unsigned char *contenido = (unsigned char *)malloc(tam);
+    unsigned char *contenido = (unsigned char *)malloc(++tam);
     f_entrada.read((char *)contenido, tam);
     f_entrada.close();
-
+    contenido[tam] = NULO;
     const int dimDiccionario = 257;
     //Genera el diccionario a utilizar: los caracteres de la tabla ASCII
     unsigned char *diccionario = (unsigned char *)malloc(dimDiccionario * sizeof(unsigned char));
@@ -424,9 +427,13 @@ int main(int argc, char const *argv[])
     { //COMPRIMIR
         int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
         unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
-
+        cout << transformada << endl;
         unsigned char *inversaBurrows = inversaBW(transformada, tam, dimDiccionario);
-
+        for (int i = 0; i < tam; i++)
+        {
+            cout << inversaBurrows[i];
+        }
+        cout << endl;
         //        unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
 
         //        unsigned char *mtfInverso= moveToFrontInverso(mtf, tam, diccionarioOriginal, dimDiccionario);

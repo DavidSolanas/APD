@@ -456,11 +456,12 @@ int main(int argc, char const *argv[])
         int tam_original;
 
         unsigned char *descomprimido = descomprimir(nom_fichero, tam_original);
-        unsigned char *mtfInverso= moveToFrontInverso(descomprimido, tam, diccionarioOriginal, dimDiccionario);
-        unsigned char *inversaBurrows = inversaBW(mtfInverso, tam, dimDiccionario);
+
+        unsigned char *mtfInverso= moveToFrontInverso(descomprimido, tam_original, diccionarioOriginal, dimDiccionario);
+        unsigned char *inversaBurrows = inversaBW(mtfInverso, tam_original, dimDiccionario);
 
         ofstream f_salida;
-        f_salida.open(nom_salida, ios::binary);
+        f_salida.open(nom_salida);
         f_salida.write((char *)inversaBurrows, tam_original);
         f_salida.close();
     }

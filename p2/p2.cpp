@@ -298,12 +298,9 @@ unsigned char *moveToFrontInverso(unsigned char *seqIndices, const int tam, unsi
 {
     unsigned char *mtfInverso = (unsigned char *)malloc(tam * sizeof(unsigned char));
 
-    //    cout << seqIndices << endl;
-
     for (int i = 0; i < tam; i++)
     {
         int indice = seqIndices[i];
-        //        cout << indice << endl;
         mtfInverso[i] = diccionario[indice];
 
         moverDelante(indice, diccionario, dimDiccionario);
@@ -326,10 +323,9 @@ unsigned char *transformadaBW(int *suffix_array, unsigned char *input, const int
     return transformada;
 }
 
-
-int buscar (unsigned char *input, const int tam, unsigned char c){
+int buscar(unsigned char *input, const int tam, unsigned char c)
+{
     int i;
-    cout << input << endl;
     for (i = 0; i < tam; i++)
     {
         if (input[i] == c)
@@ -405,7 +401,6 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
 
     //int posDolar = buscar(input, tam +1, '$');
 
-
     return inversa;
 }
 
@@ -442,31 +437,35 @@ int main(int argc, char const *argv[])
     diccionario[i] = '\0';
     strcpy(diccionarioOriginal, diccionario, dimDiccionario);
 
-    if (string(argv[1]) == "-c")    //COMPRIMIR
-    { 
+    if (string(argv[1]) == "-c") //COMPRIMIR
+    {
         int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
         unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
+
         unsigned char *mtf = moveToFront(transformada, tam, diccionario, dimDiccionario);
+
         comprimir(argv[2], mtf, tam);
     }
-    else if (string(argv[1]) == "-d")   //DESCOMPRIMIR
-    { 
+    else if (string(argv[1]) == "-d") //DESCOMPRIMIR
+    {
         string nom_fichero = argv[2];
         string nom_salida = nom_fichero.substr(0, nom_fichero.length() - 4);
         int tam_original;
 
         unsigned char *descomprimido = descomprimir(nom_fichero, tam_original);
-        unsigned char *mtfInverso= moveToFrontInverso(descomprimido, tam, diccionarioOriginal, dimDiccionario);
-        unsigned char *inversaBurrows = inversaBW(mtfInverso, tam, dimDiccionario);
+
+        unsigned char *mtfInverso = moveToFrontInverso(descomprimido, tam_original, diccionarioOriginal, dimDiccionario);
+
+        unsigned char *inversaBurrows = inversaBW(mtfInverso, tam_original, dimDiccionario);
 
         ofstream f_salida;
-        f_salida.open(nom_salida, ios::binary);
-        f_salida.write((char *)inversaBurrows, tam_original);
+        f_salida.open(nom_salida);
+        f_salida.write((char *)inversaBurrows + 1, tam_original - 1);
         f_salida.close();
     }
     else
     {
-        cout << "Opcion invalida: huf [-c|-d] <nombre_fichero>" << endl;
+        cerr << "Opcion invalida: bzip2 [-c|-d] <nombre_fichero>" << endl;
     }
 
     return 0;

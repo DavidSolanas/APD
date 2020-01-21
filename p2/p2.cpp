@@ -323,7 +323,27 @@ unsigned char *transformadaBW(int *suffix_array, unsigned char *input, const int
         transformada[i] = input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
     }
     transformada[i] = '\0'; //Finaliza la cadena con el caracter nulo
+    //transformada[tam] = '$';
     return transformada;
+}
+
+
+int buscar (unsigned char *input, const int tam, unsigned char c){
+    int i;
+    cout << input << endl;
+    for (i = 0; i < tam; i++)
+    {
+        if (input[i] == c)
+        {
+            return i;
+        }
+    }
+    if (i == tam)
+    {
+        cerr << "ERROR buscar: No se encuentra el caracter " << c << endl;
+        exit(1);
+    }
+    return -1;
 }
 
 /**
@@ -384,6 +404,9 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
     }
     inversa[tam] = '\0';
 
+    int posDolar = buscar(input, tam +1, '$');
+
+
     return inversa;
 }
 
@@ -413,8 +436,8 @@ int main(int argc, char const *argv[])
     unsigned char *diccionario = (unsigned char *)malloc(dimDiccionario * sizeof(unsigned char));
     unsigned char *diccionarioOriginal = (unsigned char *)malloc(dimDiccionario * sizeof(unsigned char));
     int i;
-    for (i = 1; i < 256; i++)
-    { //Empieza desde 1 para no pillar el caracter nulo ('\0')
+    for (i = 0; i < 256; i++)
+    { 
         diccionario[i] = (unsigned char)i;
     }
     diccionario[i] = '\0';
@@ -424,12 +447,12 @@ int main(int argc, char const *argv[])
     { //COMPRIMIR
         int *suffix_array = crear_vector_sufijos(contenido, 0, tam);
         unsigned char *transformada = transformadaBW(suffix_array, contenido, tam);
+        cout << transformada << endl;
 
-        unsigned char *inversaBurrows = inversaBW(transformada, tam, dimDiccionario);
+        //unsigned char *inversaBurrows = inversaBW(transformada, tam, dimDiccionario);
 
-        //        unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
-
-        //        unsigned char *mtfInverso= moveToFrontInverso(mtf, tam, diccionarioOriginal, dimDiccionario);
+        //unsigned char *mtf = moveToFront(contenido, tam, diccionario, dimDiccionario);
+        //unsigned char *mtfInverso= moveToFrontInverso(mtf, tam, diccionarioOriginal, dimDiccionario);
 
         //comprimir(argv[2], contenido, tam);
     }

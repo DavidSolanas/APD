@@ -320,7 +320,7 @@ unsigned char *transformadaBW(int *suffix_array, unsigned char *input, const int
     int i;
     for (i = 0; i < tam; i++)
     {
-        transformada[i] = input[(suffix_array[i] - 1 + tam) % tam];  //Calcula el ultimo caracter
+        transformada[i] = input[(suffix_array[i] - 1 + tam) % tam]; //Calcula el ultimo caracter
     }
     transformada[i] = NULO; //Finaliza la cadena con el caracter nulo
     return transformada;
@@ -349,7 +349,7 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
     {
         freq[input[i]]++;
     }
-    
+
     //Sumas parciales para el calculo del número de elementos menores
     //que el elemento i-ésimo
     for (int i = 0, sum = 0; i < dimDiccionario; i++)
@@ -358,12 +358,12 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
         freq[i] = sum;
         sum += t;
     }
-    
+
     // Bucle para rellenar c[] con la cuenta de menores a cada caracter
     //Para ello se usa el vector de frecuencias de caracteres calculado
     for (int i = 0; i < tam; i++)
     {
-        c[i] = freq[input[i]];
+        c[i] = freq[(int)input[i]];
     }
 
     //Para almacenar el numero de los caracteres que vamos detectando:
@@ -438,7 +438,7 @@ int main(int argc, char const *argv[])
     strcpy(diccionarioOriginal, diccionario, dimDiccionario);
 
     if (string(argv[1]) == "-c") //COMPRIMIR
-    {   
+    {
         //Medir tiempo comprimir
         struct timespec start, finish;
         clock_gettime(CLOCK_REALTIME, &start);

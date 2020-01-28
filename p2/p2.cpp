@@ -349,19 +349,21 @@ unsigned char *inversaBW(unsigned char *input, const int tam, const int dimDicci
     {
         freq[input[i]]++;
     }
-
+    
+    //Sumas parciales para el calculo del número de elementos menores
+    //que el elemento i-ésimo
+    for (int i = 0, sum = 0; i < dimDiccionario; i++)
+    {
+        int t = freq[i];
+        freq[i] = sum;
+        sum += t;
+    }
+    
     // Bucle para rellenar c[] con la cuenta de menores a cada caracter
     //Para ello se usa el vector de frecuencias de caracteres calculado
-    //de forma que el numero menor de caracteres del caracter i-ésimo será
-    // los almacenados en freq desde 0 a i-1
     for (int i = 0; i < tam; i++)
     {
-        c[i] = 0;
-        int x = (int)input[i];
-        for (int j = 0; j < x; j++)
-        {
-            c[i] += freq[j];
-        }
+        c[i] = freq[input[i]];
     }
 
     //Para almacenar el numero de los caracteres que vamos detectando:
